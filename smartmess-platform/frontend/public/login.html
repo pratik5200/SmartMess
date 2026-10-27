@@ -12,7 +12,9 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+        rel="stylesheet">
 
     <!-- Remix Icons -->
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
@@ -35,7 +37,8 @@
             padding: 0;
         }
 
-        html, body {
+        html,
+        body {
             min-height: 100vh;
             font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: var(--surface-white);
@@ -364,8 +367,15 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(-4px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Responsive Breakpoints */
@@ -373,6 +383,7 @@
             .hero-column {
                 padding: 24px;
             }
+
             .form-column {
                 padding: 40px 36px;
             }
@@ -382,19 +393,23 @@
             .login-page {
                 flex-direction: column;
             }
+
             .hero-column {
                 flex: none;
                 padding: 24px 20px;
                 border-right: none;
                 border-bottom: 1px solid #F0ECE4;
             }
+
             .hero-image {
                 max-height: 380px;
             }
+
             .form-column {
                 flex: 1;
                 padding: 36px 24px 48px 24px;
             }
+
             .welcome-heading {
                 font-size: 1.95rem;
             }
@@ -407,10 +422,8 @@
     <div class="login-page">
         <!-- Left Hero Section with the illustration -->
         <div class="hero-column">
-            <img id="heroImage"
-                 src="/smartmess_hero.png" 
-                 alt="SmartMess - Good food. Easier days." 
-                 class="hero-image" />
+            <img id="heroImage" src="/smartmess_hero.png" alt="SmartMess - Good food. Easier days."
+                class="hero-image" />
         </div>
 
         <!-- Right Form Section -->
@@ -430,14 +443,17 @@
                     <!-- 2. Email address or student ID (Both modes) -->
                     <div class="input-group" id="identifierGroup">
                         <i class="ri-mail-line input-icon"></i>
-                        <input type="text" id="identifier" placeholder="Email address or student ID" autocomplete="username" required>
+                        <input type="text" id="identifier" placeholder="Email address or student ID"
+                            autocomplete="username" required>
                     </div>
 
                     <!-- 3. Password (Both modes) -->
                     <div class="input-group" id="passwordGroup">
                         <i class="ri-lock-line input-icon"></i>
-                        <input type="password" id="password" placeholder="Password" autocomplete="current-password" required>
-                        <button type="button" class="eye-toggle-btn" id="togglePasswordBtn" title="Toggle password visibility">
+                        <input type="password" id="password" placeholder="Password" autocomplete="current-password"
+                            required>
+                        <button type="button" class="eye-toggle-btn" id="togglePasswordBtn"
+                            title="Toggle password visibility">
                             <i class="ri-eye-off-line" id="togglePasswordIcon"></i>
                         </button>
                     </div>
@@ -445,8 +461,10 @@
                     <!-- 4. Confirm Password (Visible in Sign Up mode) -->
                     <div class="input-group" id="confirmPasswordGroup" style="display: none;">
                         <i class="ri-lock-line input-icon"></i>
-                        <input type="password" id="confirmPassword" placeholder="Confirm Password" autocomplete="new-password">
-                        <button type="button" class="eye-toggle-btn" id="toggleConfirmPasswordBtn" title="Toggle confirm password visibility">
+                        <input type="password" id="confirmPassword" placeholder="Confirm Password"
+                            autocomplete="new-password">
+                        <button type="button" class="eye-toggle-btn" id="toggleConfirmPasswordBtn"
+                            title="Toggle confirm password visibility">
                             <i class="ri-eye-off-line" id="toggleConfirmPasswordIcon"></i>
                         </button>
                     </div>
@@ -488,7 +506,8 @@
                     <!-- Switcher: Create an account / Log in -->
                     <div class="account-switch-wrapper">
                         <span id="toggleTextPrompt">New to SmartMess?</span>
-                        <a href="#" id="toggleAuthMode" class="account-switch-link" onclick="toggleMode(event)">Create an account</a>
+                        <a href="#" id="toggleAuthMode" class="account-switch-link" onclick="toggleMode(event)">Create
+                            an account</a>
                     </div>
                 </form>
 
@@ -497,7 +516,11 @@
 
                 <!-- Terms and Privacy Policy -->
                 <p class="terms-text" id="termsText">
-                    By continuing, you agree to our <a href="#" onclick="alert('SmartMess Terms of Service: Designed for IITR Mess Dining Facilities.'); return false;">Terms</a> and <a href="#" onclick="alert('SmartMess Privacy Policy: Your meal and hostel details are stored securely.'); return false;">Privacy Policy</a>.
+                    By continuing, you agree to our <a href="#"
+                        onclick="alert('SmartMess Terms of Service: Designed for IITR Mess Dining Facilities.'); return false;">Terms</a>
+                    and <a href="#"
+                        onclick="alert('SmartMess Privacy Policy: Your meal and hostel details are stored securely.'); return false;">Privacy
+                        Policy</a>.
                 </p>
             </div>
         </div>
@@ -557,7 +580,7 @@
         function toggleMode(event) {
             if (event) event.preventDefault();
             isSignUpMode = !isSignUpMode;
-            
+
             const heroImage = document.getElementById('heroImage');
             const authTitle = document.getElementById('authTitle');
             const authSubtitle = document.getElementById('authSubtitle');
@@ -571,7 +594,7 @@
             const toggleTextPrompt = document.getElementById('toggleTextPrompt');
             const submitBtn = document.getElementById('submitBtn');
             const termsText = document.getElementById('termsText');
-            
+
             errorText.style.display = 'none';
 
             if (isSignUpMode) {
@@ -586,21 +609,21 @@
                 // Sign Up Headers & Texts matching Image 1
                 authTitle.innerText = "Create your account";
                 authSubtitle.innerText = "Join SmartMess and make your mess experience easier.";
-                
+
                 // Show Sign Up inputs in the exact layout order
                 fullNameGroup.style.display = 'flex';
                 nameInput.required = true;
-                
+
                 confirmPasswordGroup.style.display = 'flex';
                 confirmInput.required = true;
-                
+
                 bhawanSelectGroup.style.display = 'flex';
                 bhawanSelect.required = true;
-                
+
                 submitBtn.innerText = "Create account";
                 toggleTextPrompt.innerText = "Already have an account?";
                 toggleLink.innerText = "Log in";
-                
+
                 termsText.innerHTML = 'By creating an account, you agree to our <a href="#" onclick="alert(\'SmartMess Terms of Service: Designed for IITR Mess Dining Facilities.\'); return false;">Terms</a> and <a href="#" onclick="alert(\'SmartMess Privacy Policy: Your meal and hostel details are stored securely.\'); return false;">Privacy Policy</a>.';
             } else {
                 // Switch hero image to Login mockup
@@ -614,19 +637,19 @@
                 // Login Headers & Texts matching Login mockup
                 authTitle.innerText = "Welcome back";
                 authSubtitle.innerText = "Log in to your SmartMess account";
-                
+
                 fullNameGroup.style.display = 'none';
                 nameInput.required = false;
                 nameInput.value = "";
-                
+
                 confirmPasswordGroup.style.display = 'none';
                 confirmInput.required = false;
-                confirmInput.value = ""; 
+                confirmInput.value = "";
 
                 bhawanSelectGroup.style.display = 'none';
                 bhawanSelect.required = false;
                 bhawanSelect.selectedIndex = 0;
-                
+
                 submitBtn.innerText = "Log in";
                 toggleTextPrompt.innerText = "New to SmartMess?";
                 toggleLink.innerText = "Create an account";
@@ -661,7 +684,7 @@
                 if (password !== confirmPassword) {
                     errorText.innerText = "Passwords do not match. Please try again.";
                     errorText.style.display = 'block';
-                    return; 
+                    return;
                 }
             }
 
@@ -683,9 +706,9 @@
                 staffPasscode: passcodeVal,
                 isSignUp: isSignUpMode
             };
-
+            const API_BASE_URL = "https://smartmess-0hqf.onrender.com";
             try {
-                const res = await fetch('http://localhost:5000/api/auth/login', {
+                const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
