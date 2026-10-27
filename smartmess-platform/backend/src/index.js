@@ -7,23 +7,25 @@ const PORT = process.env.PORT || 5000;
 
 // --- DYNAMIC CORS CONFIGURATION ---
 const allowedOrigins = [
-    "http://localhost:3000",       // Your new frontend port
-    "http://127.0.0.1:3000",
-    "http://localhost:5500",       // VS Code Live Server port (just in case)
-    "http://127.0.0.1:5500",
-    "https://smartmess.iitr.ac.in" // Future production domain
+  "http://localhost:3000",       // Your new frontend port
+  "http://127.0.0.1:3000",
+  "http://localhost:5500",       // VS Code Live Server port (just in case)
+  "http://127.0.0.1:5500",
+  "https://smartmess.iitr.ac.in", // Future production domain
+  "https://smart-mess-theta.vercel.app"
+
 ];
 
 app.use(cors({
-    origin: function (origin, callback) {
-        if (!origin) return callback(null, true);
-        if (allowedOrigins.indexOf(origin) !== -1) {
-            callback(null, true);
-        } else {
-            callback(new Error("CORS Blocked: This website is not trusted by the SmartMess Backend."));
-        }
-    },
-    credentials: true
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error("CORS Blocked: This website is not trusted by the SmartMess Backend."));
+    }
+  },
+  credentials: true
 }));
 // ----------------------------------
 
@@ -64,7 +66,7 @@ app.get("/api/health", (req, res) => {
 
 app.listen(PORT, async () => {
   console.log(`SmartMess backend running on http://localhost:${PORT}`);
-  
+
   // Safe Wake-Up Ping: Calls your existing API so it uses the correct Prisma Adapter
   try {
     console.log("Waking up Neon database...");
