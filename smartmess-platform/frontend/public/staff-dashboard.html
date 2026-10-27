@@ -1,0 +1,2489 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Dashboard - SmartMess</title>
+    <link rel="icon" type="image/svg+xml" href="/smartmess_logo_vector.svg" />
+    <link rel="shortcut icon" href="/smartmess_logo_vector.svg" />
+    <link rel="apple-touch-icon" href="/smartmess_logo_vector.svg" />
+    <!-- Chart.js for Usage Reports -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+    <style>
+        /* Import the Organic Theme Fonts */
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&display=swap');
+
+        :root {
+            /* Core Palette */
+            --bg-cream: #FFF8ED;
+            --bg-cream-dark: #FCF5E3;
+            --surface-white: #FFFFFF;
+
+            /* Accents & Brands */
+            --primary-terracotta: #BA6017;
+            --primary-hover: #9C4F12;
+            --accent-mustard: #F4B942;
+            --accent-olive: #8A7334;
+            --secondary-green: #55582a;
+            --sidebar-hover: #5b7247;
+            --danger-red: #D9381E;
+            /* slightly deeper red to match text contrast */
+
+            /* Text & Borders */
+            --text-espresso: #2D231E;
+            --text-taupe: #756359;
+            --border-light: #EAE0D5;
+        }
+
+        /* Outlined Text Effect from the design */
+        .text-outline {
+            font-family: 'Neue Machina', sans-serif;
+            color: transparent;
+            -webkit-text-stroke: 1px #0056b3;
+            /* Replace with your specific blue/color if needed */
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+
+        *,
+        *:before,
+        *:after {
+            box-sizing: border-box;
+        }
+
+        html {
+            width: 100%;
+            max-width: 100vw;
+            overflow-x: clip;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'DM Sans', sans-serif;
+            background-color: var(--bg-cream);
+            color: var(--text-espresso);
+            display: flex;
+            width: 100%;
+            max-width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            overflow-x: clip;
+        }
+
+        /* --- TOPBAR CENTER NAVIGATION --- */
+        .topbar-center-nav {
+            display: flex;
+            gap: 15px;
+            width: 100%;
+            justify-content: center;
+            overflow-x: auto;
+            padding: 10px 0;
+            order: 3;
+            /* Push below on mobile */
+            /* Hide scrollbar for a cleaner look */
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .topbar-center-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        @media (min-width: 900px) {
+            .topbar-center-nav {
+                gap: 35px;
+                position: absolute;
+                left: 50%;
+                transform: translateX(-50%);
+                width: auto;
+                padding: 0;
+                order: initial;
+                overflow: visible;
+            }
+        }
+
+        .topbar-center-nav a {
+            font-family: 'Fraunces', serif;
+            text-decoration: none;
+            color: var(--text-espresso);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            position: relative;
+            overflow: hidden;
+            line-height: 1.5;
+        }
+
+        .topbar-center-nav a span {
+            display: block;
+            transition: transform 450ms cubic-bezier(0.76, 0, 0.24, 1);
+        }
+
+        .topbar-center-nav a .roll-text-hover {
+            position: absolute;
+            left: 0;
+            top: 0;
+            transform: translateY(100%);
+            color: var(--primary-terracotta);
+        }
+
+        .topbar-center-nav a:hover .roll-text,
+        .topbar-center-nav a:focus-visible .roll-text {
+            transform: translateY(-100%);
+        }
+
+        .topbar-center-nav a:hover .roll-text-hover,
+        .topbar-center-nav a:focus-visible .roll-text-hover {
+            transform: translateY(0);
+        }
+
+        /* --- SIDEBAR STYLES --- */
+        .sidebar {
+            width: 260px;
+            background-color: var(--secondary-green);
+            color: var(--bg-cream);
+            display: flex;
+            flex-direction: column;
+            box-shadow: 4px 0 25px rgba(45, 35, 30, 0.2);
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 100;
+            transform: translateX(-100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.open {
+            transform: translateX(0);
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(45, 35, 30, 0.4);
+            backdrop-filter: blur(3px);
+            z-index: 90;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* --- HAMBURGER & CROSS BUTTONS --- */
+        .menu-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 5px;
+            color: var(--accent-olive);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s;
+        }
+
+        .menu-toggle-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .close-sidebar-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: var(--bg-cream);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.2s;
+        }
+
+        .close-sidebar-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .sidebar-header {
+            padding: 30px 20px 20px;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 248, 237, 0.1);
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-family: 'Fraunces', serif;
+            font-size: 26px;
+            color: var(--bg-cream);
+            font-weight: 700;
+            letter-spacing: -0.5px;
+        }
+
+        .sidebar-header p {
+            font-size: 13px;
+            color: var(--accent-mustard);
+            font-weight: 600;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            padding: 20px 15px;
+            flex-grow: 1;
+            gap: 5px;
+        }
+
+        .nav-links a {
+            font-family: 'Fraunces', serif;
+            color: var(--bg-cream);
+            text-decoration: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            transition: all 0.2s ease;
+            border-radius: 9999px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-links a:hover {
+            background-color: var(--sidebar-hover);
+        }
+
+        .nav-links a.active {
+            background-color: var(--primary-terracotta);
+            color: var(--surface-white);
+            font-weight: 600;
+            box-shadow: 0 4px 10px rgba(186, 96, 23, 0.3);
+        }
+
+        .logout-container {
+            padding: 20px;
+            border-top: 1px solid rgba(255, 248, 237, 0.1);
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: transparent;
+            color: #F87171;
+            border: 1px solid #F87171;
+            border-radius: 9999px;
+            cursor: pointer;
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 700;
+            font-size: 15px;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #F87171;
+            color: white;
+        }
+
+        /* MAIN CONTENT & TOPBAR */
+        .main-content {
+            flex-grow: 1;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .topbar {
+            position: relative;
+            background-color: var(--bg-cream-dark);
+            padding: 16px 40px;
+            box-shadow: 0 4px 20px rgba(45, 35, 30, 0.04);
+            border-bottom: 1px solid var(--border-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 5;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .topbar h1 {
+            font-family: 'Fraunces', serif;
+            font-size: 24px;
+            color: var(--accent-olive);
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* --- TOPBAR ICON BUTTONS --- */
+        .topbar-icon-btn {
+            position: relative;
+            width: 42px;
+            height: 42px;
+            min-width: 42px;
+            min-height: 42px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            cursor: pointer;
+            border: 1.5px solid transparent;
+            background: #ffffff;
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 6px rgba(45, 35, 30, 0.05);
+            padding: 0;
+            outline: none;
+        }
+
+        .topbar-icon-btn i {
+            font-size: 21px;
+            line-height: 1;
+            transition: transform 0.2s ease;
+        }
+
+        .topbar-icon-btn:active {
+            transform: scale(0.92);
+        }
+
+        /* Student View Button Variant (Olive / Green Accent) */
+        .topbar-icon-btn.student-btn {
+            color: var(--secondary-green);
+            background: rgba(85, 88, 42, 0.08);
+            border-color: rgba(85, 88, 42, 0.28);
+        }
+
+        .topbar-icon-btn.student-btn:hover {
+            background: var(--secondary-green);
+            color: #ffffff;
+            border-color: var(--secondary-green);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(85, 88, 42, 0.25);
+        }
+
+        .topbar-icon-btn.student-btn:hover i {
+            transform: scale(1.1);
+        }
+
+        /* Logout Button Variant (Terracotta / Red Accent) */
+        .topbar-icon-btn.logout-btn {
+            color: var(--danger-red);
+            background: rgba(217, 56, 30, 0.08);
+            border-color: rgba(217, 56, 30, 0.28);
+        }
+
+        .topbar-icon-btn.logout-btn:hover {
+            background: var(--danger-red);
+            color: #ffffff;
+            border-color: var(--danger-red);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(217, 56, 30, 0.25);
+        }
+
+        .topbar-icon-btn.logout-btn:hover i {
+            transform: scale(1.1) translateX(1px);
+        }
+
+        /* Tooltip Bubbles on Desktop Hover */
+        .topbar-icon-btn::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: -36px;
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: var(--text-espresso);
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            padding: 5px 11px;
+            border-radius: 6px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+            z-index: 1000;
+        }
+
+        .topbar-icon-btn::before {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: var(--text-espresso);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 1000;
+        }
+
+        .topbar-icon-btn:hover::after,
+        .topbar-icon-btn:hover::before {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--secondary-green);
+            border: 2px solid var(--secondary-green);
+            padding: 8px 20px;
+            border-radius: 9999px;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            transition: 0.2s;
+            font-size: 0.95rem;
+            font-family: 'DM Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn-outline:hover {
+            background: var(--secondary-green);
+            color: var(--surface-white);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--danger-red);
+            border: 2px solid var(--danger-red);
+            padding: 8px 20px;
+            border-radius: 9999px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            justify-content: center;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-red);
+            color: var(--surface-white);
+        }
+
+        .content-area {
+            padding: 40px;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .staff-pane {
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        /* CARDS & FORMS */
+        .upload-card {
+            background: var(--surface-white);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 12px 30px rgba(45, 35, 30, 0.06);
+            border: 1px solid var(--border-light);
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        /* --- USAGE REPORTS RESPONSIVE COMPONENTS --- */
+        .reports-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #edf2f7;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .reports-header-title {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .reports-header select {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e0;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            color: #2d3748;
+            background: #f8fafc;
+            max-width: 100%;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .dietary-counts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 16px;
+            margin-bottom: 35px;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .dietary-count-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 14px;
+            padding: 18px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+            box-sizing: border-box;
+            width: 100%;
+            min-width: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .chart-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.04);
+            margin-bottom: 25px;
+            width: 100%;
+            min-width: 0;
+            box-sizing: border-box;
+        }
+
+        .chart-container-wrapper {
+            height: 350px;
+            width: 100%;
+            max-width: 100%;
+            position: relative;
+            min-width: 0;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        .form-section-title {
+            color: var(--secondary-green);
+            border-bottom: 2px dashed var(--border-light);
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+            font-size: 1.4rem;
+            margin-top: 35px;
+            font-family: 'Fraunces', serif;
+        }
+
+        .form-section-title:first-child {
+            margin-top: 0;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .input-group label {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-espresso);
+        }
+
+        .input-group input[type="date"],
+        .input-group input[type="file"],
+        .input-group input[type="time"] {
+            width: 100%;
+            max-width: 100%;
+            padding: 12px 15px;
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            background: var(--bg-cream);
+            color: var(--text-espresso);
+            box-sizing: border-box;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--primary-terracotta);
+            color: var(--surface-white);
+            border: none;
+            border-radius: 9999px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 35px;
+            font-family: 'DM Sans', sans-serif;
+            box-shadow: 0 4px 12px rgba(186, 96, 23, 0.3);
+        }
+
+        .submit-btn:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+        }
+
+        /* FILTER BUTTONS */
+        .filter-group {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 9px 22px;
+            border: 1.5px solid var(--border-light);
+            background: #ffffff;
+            color: var(--text-taupe);
+            border-radius: 9999px;
+            cursor: pointer;
+            font-weight: 700;
+            transition: all 0.2s ease;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 6px rgba(45, 35, 30, 0.04);
+        }
+
+        .filter-btn:hover {
+            border-color: var(--primary-terracotta);
+            color: var(--primary-terracotta);
+            transform: translateY(-1px);
+        }
+
+        .filter-btn.active-red {
+            background: var(--danger-red);
+            color: white;
+            border-color: var(--danger-red);
+            box-shadow: 0 4px 12px rgba(217, 56, 30, 0.25);
+        }
+
+        .filter-btn.active-all {
+            background: var(--primary-terracotta);
+            color: white;
+            border-color: var(--primary-terracotta);
+            box-shadow: 0 4px 12px rgba(186, 96, 23, 0.25);
+        }
+
+        .filter-btn.active-meal {
+            background: var(--accent-mustard);
+            color: var(--text-espresso);
+            border-color: var(--accent-mustard);
+            box-shadow: 0 4px 12px rgba(244, 185, 66, 0.25);
+        }
+
+        .menu-item-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            border: 1px solid var(--border-light);
+            border-radius: 16px;
+            margin-bottom: 12px;
+            background: var(--bg-cream);
+            color: var(--text-espresso);
+        }
+
+
+        @media (max-width: 768px) {
+
+            /* Fix the topbar for mobile */
+            .topbar {
+                padding: 12px 20px;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+
+            .topbar h1 {
+                font-size: 22px;
+            }
+
+            .topbar-right {
+                display: flex;
+                gap: 8px;
+                flex-wrap: nowrap;
+                justify-content: flex-end;
+                width: auto;
+                margin-top: 0;
+                align-items: center;
+            }
+
+            .topbar-icon-btn {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                min-height: 38px;
+            }
+
+            .topbar-icon-btn i {
+                font-size: 19px;
+            }
+
+            .topbar-icon-btn::after,
+            .topbar-icon-btn::before {
+                display: none;
+                /* Hide hover tooltips on mobile touch screens */
+            }
+
+            .topbar {
+                padding: 10px 14px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+
+            .topbar-center-nav {
+                display: flex;
+                gap: 6px;
+                width: 100%;
+                justify-content: center;
+                padding: 6px 0 2px 0;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                order: 3;
+            }
+
+            .topbar-center-nav a {
+                font-size: 13px;
+                padding: 5px 12px;
+                border-radius: 9999px;
+                background: rgba(45, 35, 30, 0.06);
+                color: var(--text-espresso);
+                white-space: nowrap;
+                transition: all 0.2s ease;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                text-decoration: none;
+            }
+
+            .topbar-center-nav a:hover,
+            .topbar-center-nav a.active {
+                background: var(--primary-terracotta);
+                color: #ffffff;
+            }
+
+            .topbar-center-nav a.active .roll-text,
+            .topbar-center-nav a.active .roll-text-hover {
+                color: #ffffff;
+            }
+
+            .btn-outline,
+            .btn-danger {
+                padding: 8px 16px;
+                font-size: 13px;
+            }
+
+            /* Ensure main content is scrollable properly */
+            body {
+                overflow: hidden;
+            }
+
+            /* Let main-content handle scrolling */
+
+            /* Adjust content area */
+            .content-area {
+                padding: 16px 12px;
+                width: 100%;
+            }
+
+            .upload-card {
+                padding: 20px 14px;
+                border-radius: 16px;
+                width: 100%;
+            }
+
+            .reports-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+            .reports-header select {
+                width: 100%;
+            }
+
+            .dietary-counts-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .chart-card {
+                padding: 16px 12px;
+                border-radius: 14px;
+            }
+
+            .chart-container-wrapper {
+                height: 280px;
+            }
+
+            /* Make grids responsive */
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* If stats grid exists */
+            .menu-item-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .action-btns {
+                width: 100%;
+                display: flex;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Dark blurred backdrop that appears when sidebar is open -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- STAFF SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+        <button class="close-sidebar-btn" onclick="toggleSidebar()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
+        <div class="sidebar-header">
+            <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 12px;">
+                <div
+                    style="width: 50px; height: 50px; border-radius: 50%; background: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 14px rgba(0,0,0,0.22); border: 2px solid rgba(243, 195, 67, 0.55); padding: 4px;">
+                    <img src="./smartmess_logo_vector.svg" alt="SmartMess Logo"
+                        style="width: 100%; height: 100%; object-fit: contain;">
+                </div>
+            </div>
+            <h2>SmartMess Admin</h2>
+            <p id="sidebarBhawanName">Staff Portal</p>
+        </div>
+
+        <nav class="nav-links">
+            <a href="index.html"><i class="ri-graduation-cap-line"></i> Student View</a>
+            <a href="#" class="active" onclick="switchStaffTab('upload', event)"><i class="ri-upload-cloud-2-line"></i>
+                Upload Menu</a>
+            <a href="#" onclick="switchStaffTab('alerts', event)"><i class="ri-feedback-line"></i> Feedback
+                <span id="alertBadge"
+                    style="background: var(--danger-red); color: white; padding: 2px 7px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; display: none;">0</span></a>
+            <a href="#" onclick="switchStaffTab('reports', event)"><i class="ri-bar-chart-box-line"></i> Usage
+                Reports</a>
+            <a href="#" onclick="switchStaffTab('settings', event)"><i class="ri-settings-3-line"></i> Mess Settings</a>
+        </nav>
+
+        <div class="logout-container">
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </aside>
+
+    <!-- MAIN AREA -->
+    <main class="main-content">
+        <header class="topbar">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <!-- Hamburger Menu Button -->
+                <button class="menu-toggle-btn" onclick="toggleSidebar()">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                <h1 id="page-title">Menu</h1>
+            </div>
+
+            <!-- NEW CENTER NAVIGATION -->
+            <nav class="topbar-center-nav">
+                <a href="index.html">
+                    <span class="roll-text">Home</span>
+                    <span class="roll-text-hover" aria-hidden="true">Home</span>
+                </a>
+
+                <a onclick="switchStaffTab('alerts', event)">
+                    <span class="roll-text">Feedback</span>
+                    <span class="roll-text-hover" aria-hidden="true">Feedback</span>
+                </a>
+                <a onclick="switchStaffTab('reports', event)">
+                    <span class="roll-text">Reports</span>
+                    <span class="roll-text-hover" aria-hidden="true">Reports</span>
+                </a>
+                <a onclick="switchStaffTab('settings', event)">
+                    <span class="roll-text">Settings</span>
+                    <span class="roll-text-hover" aria-hidden="true">Settings</span>
+                </a>
+            </nav>
+
+            <div class="topbar-right">
+                <a href="index.html" class="topbar-icon-btn student-btn" data-tooltip="Student View"
+                    title="Student View" aria-label="Student View">
+                    <i class="ri-graduation-cap-line"></i>
+                </a>
+                <button class="topbar-icon-btn logout-btn" onclick="logout()" data-tooltip="Logout" title="Logout"
+                    aria-label="Logout">
+                    <i class="ri-logout-box-r-line"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="content-area">
+
+            <!-- TAB 1: UPLOAD MENU -->
+            <div id="staff-tab-upload" class="staff-pane">
+                <div class="upload-card">
+                    <form id="uploadForm">
+                        <h3 class="form-section-title">1. Weekly Menu Details (Required)</h3>
+                        <div class="form-grid">
+                            <div class="input-group">
+                                <label>Week Start Date:</label>
+                                <input type="date" id="startDate" required>
+                            </div>
+                            <div class="input-group">
+                                <label>Week End Date:</label>
+                                <input type="date" id="endDate" required>
+                            </div>
+                            <div class="input-group full-width">
+                                <label>Select Menu Image/Document:</label>
+                                <input type="file" id="menuFile" accept="image/*,application/pdf" style="display: none;"
+                                    required
+                                    onchange="document.getElementById('fileName').innerText = this.files[0]?.name || 'No file chosen'">
+                                <div style="display: flex; gap: 10px; margin-top: 5px; flex-wrap: wrap;">
+                                    <button type="button" class="btn-outline"
+                                        style="flex: 1 1 140px; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px;"
+                                        onclick="document.getElementById('menuFile').removeAttribute('capture'); document.getElementById('menuFile').click();">
+                                        <i class="ri-folder-upload-line"></i> Upload from Storage
+                                    </button>
+                                    <button type="button" class="btn-outline"
+                                        style="flex: 1 1 140px; padding: 12px; display: flex; align-items: center; justify-content: center; gap: 8px; background: #2b6cb0; color: white; border-color: #2b6cb0;"
+                                        onclick="document.getElementById('menuFile').setAttribute('capture', 'environment'); document.getElementById('menuFile').click();">
+                                        <i class="ri-camera-line"></i> Open Camera
+                                    </button>
+                                </div>
+                                <p id="fileName"
+                                    style="font-size: 0.85rem; color: #4a5568; margin-top: 8px; font-weight: bold;">No
+                                    file chosen</p>
+                            </div>
+                        </div>
+
+                        <h3 class="form-section-title">2. Update Staff Signatures (Optional)</h3>
+                        <div class="form-grid">
+                            <div class="input-group"><label>Mess Secretary Sign:</label><input type="file" id="secSign"
+                                    accept="image/*"></div>
+                            <div class="input-group"><label>Asst. Warden Sign:</label><input type="file"
+                                    id="asstWardenSign" accept="image/*"></div>
+                            <div class="input-group"><label>Manager (HR) Sign:</label><input type="file" id="hrSign"
+                                    accept="image/*"></div>
+                            <div class="input-group"><label>Manager (CCB) Sign:</label><input type="file" id="ccbSign"
+                                    accept="image/*"></div>
+                            <div class="input-group full-width"><label>Mess Warden Sign:</label><input type="file"
+                                    id="wardenSign" accept="image/*"></div>
+                        </div>
+                        <button type="submit" class="submit-btn" id="submitBtn">Upload Menu & Process Data</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- TAB 2: FEEDBACK ALERTS -->
+            <div id="staff-tab-alerts" class="staff-pane" style="display: none;">
+                <div
+                    style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 22px; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <h2
+                            style="font-family: 'Fraunces', serif; color: var(--text-espresso); font-size: 1.85rem; font-weight: 700; margin: 0 0 6px 0;">
+                            Student Feedback</h2>
+                        <p
+                            style="font-family: 'DM Sans', sans-serif; color: var(--text-taupe); font-size: 0.95rem; margin: 0;">
+                            Review recent meal ratings, student remarks, and critical complaints.</p>
+                    </div>
+                </div>
+
+                <div class="filter-group" style="margin-bottom: 14px;">
+                    <button class="filter-btn active-all" id="btnFilterAll" onclick="setSeverityFilter('ALL')"
+                        style="display: flex; align-items: center; gap: 7px;"><i class="ri-file-list-3-line"></i> All
+                        Feedback</button>
+                    <button class="filter-btn" id="btnFilterRed" onclick="setSeverityFilter('RED')"
+                        style="display: flex; align-items: center; gap: 7px;"><i class="ri-alarm-warning-line"></i>
+                        Critical Alerts (&le; 2.0)</button>
+                </div>
+                <div class="filter-group"
+                    style="border-top: 1px solid var(--border-light); padding-top: 16px; margin-bottom: 25px;">
+                    <button class="filter-btn active-meal" id="btnMealALL" onclick="setMealFilter('ALL')">All
+                        Meals</button>
+                    <button class="filter-btn" id="btnMealBreakfast"
+                        onclick="setMealFilter('Breakfast')">Breakfast</button>
+                    <button class="filter-btn" id="btnMealLunch" onclick="setMealFilter('Lunch')">Lunch</button>
+                    <button class="filter-btn" id="btnMealDinner" onclick="setMealFilter('Dinner')">Dinner</button>
+                </div>
+                <div id="alertsContainer" style="margin-top: 20px;">
+                    <p style="color: var(--text-taupe);">Loading feedback...</p>
+                </div>
+            </div>
+
+            <!-- TAB 3: USAGE REPORTS -->
+            <div id="staff-tab-reports" class="staff-pane" style="display: none;">
+                <div class="upload-card">
+                    <!-- Week Selector -->
+                    <div class="reports-header">
+                        <div class="reports-header-title">
+                            <h3 style="margin: 0; color: #2d3748;">Performance Dashboard</h3>
+                            <p style="color: #718096; font-size: 0.9rem; margin: 5px 0 0 0;">Analyze trends and student
+                                satisfaction.</p>
+                        </div>
+                        <select id="weekSelector" onchange="renderUsageCharts()">
+                            <option value="">Loading weeks...</option>
+                        </select>
+                    </div>
+
+                    <h4 style="color: #4a5568; margin-bottom: 15px; display: flex; align-items: center; gap: 8px;"><i
+                            class="ri-coupon-3-line"></i> Upcoming Non-Veg Coupon Headcounts</h4>
+                    <div id="dietaryCountsContainer" class="dietary-counts-grid">
+                        <p style="color: #718096; font-size: 0.9rem;">Loading headcounts...</p>
+                    </div>
+
+                    <!-- WEEKLY MEAL REPORT GRAPH CARD -->
+                    <div class="chart-card">
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 18px;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <h4
+                                    style="color: #2d3748; margin: 0 0 6px 0; font-size: 1.15rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                    <i class="ri-bar-chart-grouped-line" style="color: var(--primary-terracotta);"></i>
+                                    Weekly Meal Feedback Report
+                                </h4>
+                                <p style="color: #718096; font-size: 0.88rem; margin: 0; line-height: 1.45;">
+                                    Ratings (1 to 5 Stars) for every meal across days of the week. <strong>Click any
+                                        meal bar</strong> to view food items served and student ratings.
+                                </p>
+                            </div>
+                            <div id="chartSummaryStats"
+                                style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                <!-- Dynamic review stats -->
+                            </div>
+                        </div>
+
+                        <!-- Chart Canvas Container -->
+                        <div class="chart-container-wrapper">
+                            <canvas id="weeklyMealChart"></canvas>
+                        </div>
+
+                        <div
+                            style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 12px; border-top: 1px dashed #e2e8f0; font-size: 0.82rem; color: #718096; flex-wrap: wrap; gap: 10px;">
+                            <span
+                                style="display: flex; align-items: center; gap: 6px; color: var(--primary-terracotta); font-weight: 600;">
+                                <i class="ri-cursor-line"></i> Interactive: Click any bar on the graph to inspect meal
+                                items and ratings breakdown below
+                            </span>
+                            <span id="chartActiveWeekLabel" style="color: #4a5568; font-weight: 600;"></span>
+                        </div>
+                    </div>
+
+                    <!-- CLICKED MEAL FEEDBACK DETAILS -->
+                    <div id="mealDetailContainer" style="margin-bottom: 40px; scroll-margin-top: 20px;">
+                        <!-- Placeholder before a meal is clicked -->
+                        <div id="mealDetailPlaceholder"
+                            style="background: #f8fafc; border: 2px dashed #cbd5e0; border-radius: 14px; padding: 36px 20px; text-align: center; color: #718096;">
+                            <i class="ri-restaurant-2-line"
+                                style="font-size: 2.2rem; color: #a0aec0; display: block; margin-bottom: 8px;"></i>
+                            <h5 style="margin: 0 0 6px 0; color: #4a5568; font-size: 1.05rem; font-weight: 700;">Click
+                                on Any Meal in the Graph Above</h5>
+                            <p
+                                style="margin: 0; font-size: 0.88rem; max-width: 520px; margin: 0 auto; line-height: 1.5;">
+                                Tap Breakfast, Lunch, or Dinner for any day on the graph to inspect food items served
+                                and the 1-to-5 star rating breakdown.
+                            </p>
+                        </div>
+
+                        <!-- Rendered Details Card -->
+                        <div id="mealDetailCard"
+                            style="display: none; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 6px 20px rgba(0,0,0,0.06);">
+                            <!-- Dynamic Content injected via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: MESS SETTINGS -->
+            <div id="staff-tab-settings" class="staff-pane" style="display: none;">
+
+                <div class="upload-card" style="margin-bottom: 20px;">
+                    <h3 class="form-section-title" style="margin-top: 0;">Currently Active Menu</h3>
+                    <p style="color: #718096; font-size: 0.9rem; margin-bottom: 15px;">Verify the physical menu document
+                        or delete the entire upload if there was a mistake.</p>
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button class="btn-outline" onclick="viewCurrentMenuImage()"
+                            style="display: flex; align-items: center; gap: 8px;">
+                            <i class="ri-file-text-line"></i> View Uploaded Menu Document
+                        </button>
+                        <button class="btn-danger" onclick="deleteLatestMenuUpload()"
+                            style="display: flex; align-items: center; gap: 8px;">
+                            <i class="ri-delete-bin-line"></i> Delete Entire Menu Upload
+                        </button>
+                    </div>
+                </div>
+
+                <div class="upload-card">
+                    <h3 class="form-section-title" style="margin-top: 0;">Manage Individual Meals</h3>
+                    <p style="color: #718096; font-size: 0.9rem; margin-bottom: 15px;">Delete incorrect meals or adjust
+                        specific timings.</p>
+                    <div id="menuListContainer">
+                        <p>Loading active menus...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIME EDIT MODAL -->
+            <div id="timeModal"
+                style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); align-items:center; justify-content:center; z-index:1000;">
+                <div
+                    style="background:white; padding:30px; border-radius:12px; width:90%; max-width:400px; box-shadow: 0 10px 25px rgba(0,0,0,0.2);">
+                    <h3 style="margin-top:0; color:#2d3748;">Edit Meal Time</h3>
+                    <p id="timeModalTitle" style="color:#718096; font-size:0.9rem; margin-bottom:20px;"></p>
+                    <input type="hidden" id="editMenuId">
+
+                    <div style="margin-bottom: 15px;">
+                        <label style="display:block; margin-bottom:5px; font-weight:bold; color:#4a5568;">Start
+                            Time:</label>
+                        <input type="time" id="editStartTime"
+                            style="width:100%; padding:10px; border:1px solid #cbd5e0; border-radius:6px;">
+                    </div>
+                    <div style="margin-bottom: 25px;">
+                        <label style="display:block; margin-bottom:5px; font-weight:bold; color:#4a5568;">End
+                            Time:</label>
+                        <input type="time" id="editEndTime"
+                            style="width:100%; padding:10px; border:1px solid #cbd5e0; border-radius:6px;">
+                    </div>
+
+                    <div style="display:flex; gap:10px;">
+                        <button onclick="submitTimeEdit()" class="submit-btn" style="margin-top:0; flex:2;">Save
+                            Timings</button>
+                        <button onclick="closeTimeModal()" class="btn-outline" style="flex:1;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // --- 1. AUTHENTICATION & SETUP ---
+        const loggedInUser = JSON.parse(localStorage.getItem('smartmess_user'));
+        const BHAWAN_ID = loggedInUser ? (loggedInUser.bhawanId || (loggedInUser.bhawan && loggedInUser.bhawan.id)) : null;
+        if (!loggedInUser || loggedInUser.role === 'STUDENT') {
+            alert("Unauthorized. Staff access only.");
+            window.location.href = 'index.html';
+        }
+
+        function updateSidebarBhawanDisplay(name) {
+            const el = document.getElementById('sidebarBhawanName');
+            if (el && name) el.innerText = name;
+        }
+
+        const initialBhawanName = loggedInUser.bhawanName || (loggedInUser.bhawan && loggedInUser.bhawan.name);
+        if (initialBhawanName) {
+            updateSidebarBhawanDisplay(initialBhawanName);
+            if (!loggedInUser.bhawanName) {
+                loggedInUser.bhawanName = initialBhawanName;
+                localStorage.setItem('smartmess_user', JSON.stringify(loggedInUser));
+            }
+        } else if (loggedInUser.id) {
+            fetch(`http://localhost:5000/api/auth/profile/${loggedInUser.id}`)
+                .then(res => res.json())
+                .then(userData => {
+                    const fetchedName = userData.bhawanName || (userData.bhawan && userData.bhawan.name);
+                    if (fetchedName) {
+                        updateSidebarBhawanDisplay(fetchedName);
+                        loggedInUser.bhawanName = fetchedName;
+                        if (userData.bhawan) loggedInUser.bhawan = userData.bhawan;
+                        localStorage.setItem('smartmess_user', JSON.stringify(loggedInUser));
+                    }
+                }).catch(() => { });
+        }
+
+        function logout() {
+            localStorage.removeItem('smartmess_user');
+            window.location.replace('login.html');
+        }
+
+        // --- GLOBAL DATE HELPER (Timezone-safe & exact Monday-Sunday mapping) ---
+        function getExactMealDate(weekStartStr, dayName) {
+            if (!weekStartStr) return new Date(0);
+            const dayOffsets = { 'Monday': 0, 'Tuesday': 1, 'Wednesday': 2, 'Thursday': 3, 'Friday': 4, 'Saturday': 5, 'Sunday': 6 };
+            const offset = dayOffsets[dayName];
+            if (offset === undefined) return new Date(0);
+
+            const base = new Date(weekStartStr);
+            const year = base.getUTCFullYear();
+            const month = base.getUTCMonth();
+            const day = base.getUTCDate();
+
+            return new Date(year, month, day + offset);
+        }
+
+        // --- 2. TAB SWITCHING LOGIC ---
+        function switchStaffTab(tabName, e) {
+            if (e && e.preventDefault) e.preventDefault();
+            document.querySelectorAll('.nav-links a').forEach(l => l.classList.remove('active'));
+            document.querySelectorAll('.topbar-center-nav a').forEach(l => l.classList.remove('active'));
+            document.querySelectorAll('.staff-pane').forEach(pane => pane.style.display = 'none');
+
+            // Close mobile sidebar if open
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            if (sidebar) sidebar.classList.remove('open');
+            if (overlay) overlay.classList.remove('show');
+
+            if (tabName === 'upload') {
+                document.getElementById('staff-tab-upload').style.display = 'block';
+                document.getElementById('page-title').innerText = 'Menu';
+                document.querySelector('.nav-links a[onclick*="upload"]')?.classList.add('active');
+            } else if (tabName === 'alerts') {
+                document.getElementById('staff-tab-alerts').style.display = 'block';
+                document.getElementById('page-title').innerText = 'Feedback';
+                document.querySelector('.nav-links a[onclick*="alerts"]')?.classList.add('active');
+                document.querySelector('.topbar-center-nav a[onclick*="alerts"]')?.classList.add('active');
+                setSeverityFilter('ALL');
+                fetchFeedbackData();
+            } else if (tabName === 'reports') {
+                document.getElementById('staff-tab-reports').style.display = 'block';
+                document.getElementById('page-title').innerText = 'Report';
+                document.querySelector('.nav-links a[onclick*="reports"]')?.classList.add('active');
+                document.querySelector('.topbar-center-nav a[onclick*="reports"]')?.classList.add('active');
+                initUsageReports();
+            } else if (tabName === 'settings') {
+                document.getElementById('staff-tab-settings').style.display = 'block';
+                document.getElementById('page-title').innerText = 'Setting';
+                document.querySelector('.nav-links a[onclick*="settings"]')?.classList.add('active');
+                document.querySelector('.topbar-center-nav a[onclick*="settings"]')?.classList.add('active');
+                fetchActiveMenus();
+            }
+        }
+
+        // --- 3. FEEDBACK ALERTS LOGIC (SWR Cached) ---
+        let allFetchedFeedback = [];
+        try {
+            const cachedFb = sessionStorage.getItem('smartmess_all_feedback_' + BHAWAN_ID);
+            if (cachedFb) {
+                allFetchedFeedback = JSON.parse(cachedFb);
+            }
+        } catch (e) { }
+
+        let severityFilter = 'ALL';
+        let mealFilter = 'ALL';
+
+        function updateAlertBadge() {
+            const criticalCount = allFetchedFeedback.filter(m => m.ratingCount > 0 && m.averageRating <= 2.0).length;
+            const badge = document.getElementById('alertBadge');
+            if (badge) {
+                if (criticalCount > 0) {
+                    badge.innerText = criticalCount;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+
+        function setSeverityFilter(type) {
+            severityFilter = type;
+            document.getElementById('btnFilterRed')?.classList.remove('active-red');
+            document.getElementById('btnFilterAll')?.classList.remove('active-all');
+
+            if (type === 'RED') {
+                document.getElementById('btnFilterRed')?.classList.add('active-red');
+            } else {
+                document.getElementById('btnFilterAll')?.classList.add('active-all');
+            }
+            renderAlerts();
+        }
+
+        function setMealFilter(meal) {
+            const formattedMeal = meal.charAt(0).toUpperCase() + meal.slice(1).toLowerCase();
+            mealFilter = formattedMeal.toUpperCase();
+
+            ['All', 'Breakfast', 'Lunch', 'Dinner'].forEach(m => {
+                document.getElementById(`btnMeal${m}`)?.classList.remove('active-meal');
+            });
+
+            document.getElementById(`btnMeal${formattedMeal}`)?.classList.add('active-meal');
+            renderAlerts();
+        }
+
+        let isFetchingFeedback = false;
+        async function fetchFeedbackData() {
+            if (isFetchingFeedback) return;
+            isFetchingFeedback = true;
+            try {
+                const response = await fetch(`http://localhost:5000/api/menus/all-feedback/${BHAWAN_ID}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    allFetchedFeedback = data;
+                    try {
+                        sessionStorage.setItem('smartmess_all_feedback_' + BHAWAN_ID, JSON.stringify(data));
+                    } catch (e) { }
+
+                    updateAlertBadge();
+
+                    if (document.getElementById('staff-tab-alerts')?.style.display === 'block') {
+                        renderAlerts();
+                    }
+                    if (document.getElementById('staff-tab-reports')?.style.display === 'block') {
+                        populateWeekSelector();
+                        renderUsageCharts();
+                    }
+                }
+            } catch (error) {
+                console.error("fetchFeedbackData error:", error);
+            } finally {
+                isFetchingFeedback = false;
+            }
+        }
+
+        function renderAlerts() {
+            const container = document.getElementById('alertsContainer');
+            if (!container) return;
+
+            // 1. Group all feedback by Day (week_start + day)
+            const daysMap = new Map();
+
+            allFetchedFeedback.forEach(meal => {
+                if (!meal.ratingCount || meal.ratingCount === 0) return;
+
+                const matchesMeal = mealFilter === 'ALL' || meal.meal_type.toLowerCase() === mealFilter.toLowerCase();
+                const matchesSeverity = severityFilter === 'ALL' || (severityFilter === 'RED' && meal.averageRating <= 2.0);
+                if (!matchesMeal || !matchesSeverity) return;
+
+                const key = `${meal.week_start || ''}_${meal.day}`;
+                if (!daysMap.has(key)) {
+                    daysMap.set(key, {
+                        day: meal.day,
+                        week_start: meal.week_start,
+                        meals: []
+                    });
+                }
+                daysMap.get(key).meals.push(meal);
+            });
+
+            if (daysMap.size === 0) {
+                if (allFetchedFeedback.length === 0) {
+                    container.innerHTML = `
+                        <div style="background: var(--surface-white); border: 1px solid var(--border-light); padding: 45px 20px; text-align: center; border-radius: 20px; box-shadow: 0 4px 14px rgba(45,35,30,0.04);">
+                            <p style="color: var(--text-taupe); font-size: 0.95rem; margin: 0;">Loading feedback...</p>
+                        </div>`;
+                    return;
+                }
+                container.innerHTML = `
+                    <div style="background: var(--surface-white); border: 1px solid var(--border-light); padding: 50px 20px; text-align: center; border-radius: 20px; box-shadow: 0 6px 20px rgba(45,35,30,0.05); max-width: 520px; margin: 20px auto;">
+                        <div style="width: 60px; height: 60px; border-radius: 50%; background: #FAF4E6; color: var(--primary-terracotta); display: inline-flex; align-items: center; justify-content: center; font-size: 28px; margin-bottom: 16px;">
+                            <i class="ri-checkbox-circle-line"></i>
+                        </div>
+                        <h3 style="font-family: 'Fraunces', serif; font-size: 1.45rem; color: var(--text-espresso); margin: 0 0 8px 0;">All Clear!</h3>
+                        <p style="color: var(--text-taupe); font-size: 0.95rem; margin: 0;">No matching feedback found for this filter.</p>
+                    </div>`;
+                return;
+            }
+
+            // 2. Sort Day Cards by newest date first
+            const getDayTimestamp = (dayGroup) => {
+                let maxTime = 0;
+                dayGroup.meals.forEach(m => {
+                    if (m.feedbacks && m.feedbacks.length > 0) {
+                        m.feedbacks.forEach(fb => {
+                            const t = new Date(fb.createdAt).getTime();
+                            if (!isNaN(t) && t > maxTime) maxTime = t;
+                        });
+                    }
+                });
+                if (maxTime > 0) return maxTime;
+                const exactDate = getExactMealDate(dayGroup.week_start, dayGroup.day);
+                return exactDate && !isNaN(exactDate.getTime()) ? exactDate.getTime() : 0;
+            };
+
+            const sortedDays = Array.from(daysMap.values()).sort((a, b) => getDayTimestamp(b) - getDayTimestamp(a));
+
+            const MEAL_ORDER = ['Breakfast', 'Lunch', 'Dinner'];
+            const MEAL_ICONS = {
+                'Breakfast': 'ri-cup-line',
+                'Lunch': 'ri-restaurant-line',
+                'Dinner': 'ri-bowl-line'
+            };
+            const MEAL_COLORS = {
+                'Breakfast': '#BA6017',
+                'Lunch': '#10B981',
+                'Dinner': '#6366F1'
+            };
+
+            let html = '<div style="display: flex; flex-direction: column; gap: 24px;">';
+
+            sortedDays.forEach(dayGroup => {
+                // Arrange that day's meals according to Breakfast, Lunch, Dinner
+                dayGroup.meals.sort((a, b) => {
+                    const idxA = MEAL_ORDER.indexOf(a.meal_type);
+                    const idxB = MEAL_ORDER.indexOf(b.meal_type);
+                    return (idxA !== -1 ? idxA : 99) - (idxB !== -1 ? idxB : 99);
+                });
+
+                // Format the day's date
+                let dateStr = '';
+                const exactDate = getExactMealDate(dayGroup.week_start, dayGroup.day);
+                if (exactDate && !isNaN(exactDate.getTime()) && exactDate.getFullYear() > 1970) {
+                    dateStr = exactDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                } else {
+                    for (const m of dayGroup.meals) {
+                        if (m.feedbacks && m.feedbacks.length > 0) {
+                            dateStr = new Date(m.feedbacks[0].createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                            break;
+                        }
+                    }
+                }
+
+                // Calculate Day Level Summary Stats
+                let totalDayReviews = 0;
+                let dayRatingSum = 0;
+                let hasCriticalMeal = false;
+
+                dayGroup.meals.forEach(m => {
+                    if (m.averageRating <= 2.0) hasCriticalMeal = true;
+                    if (m.feedbacks && m.feedbacks.length > 0) {
+                        m.feedbacks.forEach(fb => {
+                            if (severityFilter === 'ALL' || (severityFilter === 'RED' && fb.rating <= 2.0)) {
+                                totalDayReviews++;
+                                dayRatingSum += fb.rating;
+                            }
+                        });
+                    }
+                });
+
+                const dayAvg = totalDayReviews > 0 ? (dayRatingSum / totalDayReviews) : 0;
+                const roundedDayAvg = Math.round(dayAvg);
+                let dayStarIcons = '';
+                for (let i = 1; i <= 5; i++) {
+                    dayStarIcons += `<i class="${i <= roundedDayAvg ? 'ri-star-fill' : 'ri-star-line'}" style="color: var(--accent-mustard); margin-right: 2px;"></i>`;
+                }
+
+                const dayBadgeHtml = hasCriticalMeal
+                    ? `<span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(217, 56, 30, 0.12); color: var(--danger-red); border: 1px solid rgba(217, 56, 30, 0.25); padding: 4px 11px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;"><i class="ri-alarm-warning-line"></i> Critical Alert</span>`
+                    : `<span style="display: inline-flex; align-items: center; gap: 5px; background: rgba(186, 96, 23, 0.12); color: var(--primary-terracotta); border: 1px solid rgba(186, 96, 23, 0.25); padding: 4px 11px; border-radius: 9999px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;"><i class="ri-calendar-event-line"></i> Day Feedback</span>`;
+
+                // Render each meal inside this day card in Breakfast -> Lunch -> Dinner order
+                let mealsHtml = '';
+
+                dayGroup.meals.forEach(meal => {
+                    const isMealCritical = meal.averageRating <= 2.0;
+                    const mealIcon = MEAL_ICONS[meal.meal_type] || 'ri-restaurant-2-line';
+                    const mealColor = MEAL_COLORS[meal.meal_type] || 'var(--primary-terracotta)';
+
+                    const feedbacks = (meal.feedbacks || []).filter(fb => {
+                        return severityFilter === 'ALL' || (severityFilter === 'RED' && fb.rating <= 2.0);
+                    });
+
+                    if (feedbacks.length === 0) return;
+
+                    // Sort individual reviews inside the meal newest date first
+                    feedbacks.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+
+                    const roundedMealAvg = Math.round(meal.averageRating);
+                    let mealStarIcons = '';
+                    for (let i = 1; i <= 5; i++) {
+                        mealStarIcons += `<i class="${i <= roundedMealAvg ? 'ri-star-fill' : 'ri-star-line'}" style="color: var(--accent-mustard); margin-right: 2px;"></i>`;
+                    }
+
+                    let reviewsHtml = '';
+                    feedbacks.forEach(fb => {
+                        const isBadRating = fb.rating <= 2.0;
+                        reviewsHtml += `
+                            <div style="background: var(--surface-white); padding: 14px 18px; border-radius: 14px; border: 1px solid var(--border-light); box-shadow: 0 2px 6px rgba(45,35,30,0.02);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                                    <span style="display: inline-flex; align-items: center; gap: 4px; padding: 3px 10px; border-radius: 9999px; font-size: 0.82rem; font-weight: 700; background: ${isBadRating ? 'rgba(217, 56, 30, 0.12)' : 'rgba(244, 185, 66, 0.25)'}; color: ${isBadRating ? 'var(--danger-red)' : 'var(--text-espresso)'};">
+                                        <i class="ri-star-fill" style="color: var(--accent-mustard);"></i> Rating: ${fb.rating}.0 / 5
+                                    </span>
+                                    <span style="font-size: 0.82rem; color: var(--text-taupe); font-weight: 500; display: inline-flex; align-items: center; gap: 4px;">
+                                        <i class="ri-calendar-line"></i> ${new Date(fb.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                    </span>
+                                </div>
+                                ${fb.comment ? `<p style="margin: 6px 0 0 0; font-family: 'DM Sans', sans-serif; font-size: 0.95rem; color: var(--text-espresso); line-height: 1.55; font-style: italic;">“${fb.comment}”</p>` : ''}
+                                ${fb.imageUrl ? `<a href="${fb.imageUrl}" target="_blank" style="display: inline-block; margin-top: 10px;"><img src="${fb.imageUrl}" style="max-height: 90px; border-radius: 10px; border: 1px solid var(--border-light); box-shadow: 0 2px 8px rgba(0,0,0,0.08);"></a>` : ''}
+                            </div>
+                        `;
+                    });
+
+                    mealsHtml += `
+                        <div style="border: 1px solid var(--border-light); border-radius: 16px; background: #FFF8ED; overflow: hidden;">
+                            <div style="padding: 12px 18px; background: #FCF5E3; border-bottom: 1px solid var(--border-light); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                    <span style="background: ${mealColor}20; color: ${mealColor}; width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.15rem;">
+                                        <i class="${mealIcon}"></i>
+                                    </span>
+                                    <strong style="font-family: 'Fraunces', serif; font-size: 1.15rem; color: var(--text-espresso);">${meal.meal_type}</strong>
+                                    ${isMealCritical ? `<span style="background: rgba(217, 56, 30, 0.12); color: var(--danger-red); border: 1px solid rgba(217, 56, 30, 0.25); padding: 2px 8px; border-radius: 9999px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase;"><i class="ri-alarm-warning-line"></i> Critical Alert</span>` : ''}
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="font-size: 0.95rem; font-weight: 700; color: ${isMealCritical ? 'var(--danger-red)' : 'var(--text-espresso)'};">${meal.averageRating.toFixed(1)} / 5</span>
+                                    <span style="display: inline-flex; align-items: center;">${mealStarIcons}</span>
+                                    <span style="font-size: 0.8rem; color: var(--text-taupe);">(${feedbacks.length} review${feedbacks.length === 1 ? '' : 's'})</span>
+                                </div>
+                            </div>
+                            <div style="padding: 14px 18px; display: flex; flex-direction: column; gap: 12px;">
+                                ${reviewsHtml}
+                            </div>
+                        </div>
+                    `;
+                });
+
+                if (!mealsHtml) return;
+
+                html += `
+                    <div style="background: var(--surface-white); border-radius: 20px; box-shadow: 0 8px 24px rgba(45, 35, 30, 0.06); border: 1px solid var(--border-light); border-left: 6px solid ${hasCriticalMeal ? 'var(--danger-red)' : 'var(--primary-terracotta)'}; overflow: hidden;">
+                        <div style="background: ${hasCriticalMeal ? '#FFF4F2' : '#FCF5E3'}; padding: 18px 24px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-light); flex-wrap: wrap; gap: 12px;">
+                            <div>
+                                ${dayBadgeHtml}
+                                <h3 style="margin: 6px 0 0 0; font-family: 'Fraunces', serif; font-size: 1.35rem; font-weight: 700; color: var(--text-espresso);">
+                                    ${dayGroup.day} ${dateStr ? `<span style="font-family: 'DM Sans', sans-serif; font-size: 0.92rem; font-weight: 500; color: var(--text-taupe); margin-left: 4px;">• ${dateStr}</span>` : ''}
+                                </h3>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="display: flex; align-items: center; justify-content: flex-end; gap: 6px;">
+                                    <span style="font-size: 1.15rem; font-weight: 800; color: ${hasCriticalMeal ? 'var(--danger-red)' : 'var(--text-espresso)'};">Day Avg: ${dayAvg.toFixed(1)} / 5</span>
+                                    <span style="display: inline-flex; align-items: center;">${dayStarIcons}</span>
+                                </div>
+                                <p style="margin: 3px 0 0 0; font-size: 0.82rem; color: var(--text-taupe); font-weight: 500;">Based on ${totalDayReviews} review${totalDayReviews === 1 ? '' : 's'}</p>
+                            </div>
+                        </div>
+                        <div style="padding: 22px 24px; display: flex; flex-direction: column; gap: 18px;">
+                            ${mealsHtml}
+                        </div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        // --- 4. USAGE REPORTS LOGIC ---
+        let charts = { weeklyMeal: null };
+        let currentSelectedDay = null;
+        let currentSelectedMealType = null;
+        let currentRatingFilter = 'ALL';
+
+        function formatWeekDate(dStr) {
+            if (!dStr) return '';
+            const d = new Date(dStr);
+            const mm = String(d.getUTCMonth() + 1).padStart(2, '0');
+            const dd = String(d.getUTCDate()).padStart(2, '0');
+            const yyyy = d.getUTCFullYear();
+            return `${mm}/${dd}/${yyyy}`;
+        }
+
+        function populateWeekSelector() {
+            const selector = document.getElementById('weekSelector');
+            if (!selector) return false;
+            const currentVal = selector.value;
+
+            // Group by week_start and map week_end
+            const weekMap = new Map();
+            allFetchedFeedback.forEach(m => {
+                if (m.week_start) {
+                    const key = new Date(m.week_start).toISOString();
+                    if (!weekMap.has(key)) {
+                        let endVal = m.week_end;
+                        if (!endVal) {
+                            const endD = new Date(m.week_start);
+                            endD.setUTCDate(endD.getUTCDate() + 6);
+                            endVal = endD.toISOString();
+                        }
+                        weekMap.set(key, {
+                            start: m.week_start,
+                            end: endVal
+                        });
+                    } else if (m.week_end && !weekMap.get(key).end) {
+                        weekMap.get(key).end = m.week_end;
+                    }
+                }
+            });
+
+            const uniqueWeeks = Array.from(weekMap.values()).sort((a, b) => new Date(b.start) - new Date(a.start));
+            if (uniqueWeeks.length === 0) return false;
+
+            const optionsHtml = uniqueWeeks.map((weekObj, index) => {
+                const startStr = formatWeekDate(weekObj.start);
+                const endStr = formatWeekDate(weekObj.end);
+                const dateRange = `${startStr} - ${endStr}`;
+
+                let label = '';
+                if (index === 0) {
+                    label = `Current Week (${dateRange})`;
+                } else if (index === 1) {
+                    label = `Previous Week (${dateRange})`;
+                } else {
+                    label = `Previous Week (${dateRange})`;
+                }
+                return `<option value="${weekObj.start}">${label}</option>`;
+            }).join('');
+
+            if (selector.innerHTML !== optionsHtml) {
+                selector.innerHTML = optionsHtml;
+                const weekValues = uniqueWeeks.map(w => w.start);
+                if (currentVal && weekValues.some(v => new Date(v).getTime() === new Date(currentVal).getTime())) {
+                    selector.value = currentVal;
+                }
+            }
+            return true;
+        }
+
+        async function initUsageReports() {
+            // 1. Immediately render cached dietary headcounts if available (0ms)
+            try {
+                const cachedHeadcounts = sessionStorage.getItem('smartmess_headcounts_' + BHAWAN_ID);
+                if (cachedHeadcounts) {
+                    renderDietaryCards(JSON.parse(cachedHeadcounts));
+                }
+            } catch (e) { }
+
+            // Always refresh headcounts in background
+            fetchDietaryCounts();
+
+            // 2. If we already have feedback/menus in memory or session cache, render chart instantly (0ms)
+            const hasWeeks = populateWeekSelector();
+            if (hasWeeks) {
+                renderUsageCharts();
+            } else {
+                const selector = document.getElementById('weekSelector');
+                if (selector && !selector.value) {
+                    selector.innerHTML = '<option value="">Loading weeks...</option>';
+                }
+            }
+
+            // 3. Revalidate feedback in background to ensure fresh data
+            fetchFeedbackData();
+        }
+
+        function renderDietaryCards(data) {
+            const container = document.getElementById('dietaryCountsContainer');
+            if (!container) return;
+
+            if (!Array.isArray(data) || data.length === 0) {
+                container.innerHTML = '<p style="color: #718096; font-size: 0.9rem;">No coupon selection meals found for this week.</p>';
+                return;
+            }
+
+            const todayMidnight = new Date();
+            todayMidnight.setHours(0, 0, 0, 0);
+
+            const upcomingMeals = data.filter(meal => {
+                const exactDate = getExactMealDate(meal.date, meal.day);
+                exactDate.setHours(23, 59, 59, 999);
+                return exactDate >= todayMidnight;
+            });
+
+            if (upcomingMeals.length === 0) {
+                container.innerHTML = '<p style="color: #718096; font-size: 0.9rem;">No upcoming coupon meals remaining for this week.</p>';
+                return;
+            }
+
+            let html = '';
+            upcomingMeals.forEach(mealInfo => {
+                const exactDate = getExactMealDate(mealInfo.date, mealInfo.day);
+                const isToday = exactDate.toDateString() === new Date().toDateString();
+                const badge = isToday ? '<span style="background: var(--accent-mustard); color: var(--text-espresso); font-size: 0.72rem; padding: 2px 8px; border-radius: 999px; font-weight: 700; margin-left: 8px;">TODAY</span>' : '';
+                const nonVegCount = mealInfo['NON-VEG'] || 0;
+
+                html += `
+                    <div class="dietary-count-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #edf2f7; padding-bottom: 10px; margin-bottom: 12px;">
+                            <h5 style="margin: 0; color: #2d3748; font-size: 1.05rem; font-weight: 700;">${mealInfo.menuTitle}</h5>
+                            ${badge}
+                        </div>
+                        <p style="margin: 0 0 14px 0; font-size: 0.85rem; color: #718096; display: flex; align-items: center; gap: 6px;">
+                            <i class="ri-calendar-line"></i> ${exactDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
+                        </p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; background: #fff5f5; border: 1px solid #fed7d7; padding: 12px 16px; border-radius: 8px;">
+                            <span style="color: #742a2a; font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 6px;">
+                                <i class="ri-coupon-3-fill" style="color: #e53e3e; font-size: 1.1rem;"></i> Non-Veg Coupons
+                            </span>
+                            <span style="color: #c53030; font-weight: 800; font-size: 1.35rem;">
+                                ${nonVegCount}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+        }
+
+        // Fetch Non-Veg Coupon Counts for the Staff (Matches menu section coupon logic: only upcoming days)
+        async function fetchDietaryCounts() {
+            const container = document.getElementById('dietaryCountsContainer');
+            if (container && !container.innerHTML.trim()) {
+                container.innerHTML = '<p style="color: #718096; font-size: 0.9rem;">Loading headcounts...</p>';
+            }
+
+            try {
+                const res = await fetch(`http://localhost:5000/api/menus/selection-counts/${BHAWAN_ID}`);
+                const data = await res.json();
+                try {
+                    sessionStorage.setItem('smartmess_headcounts_' + BHAWAN_ID, JSON.stringify(data));
+                } catch (e) { }
+                renderDietaryCards(data);
+            } catch (error) {
+                console.error("Error fetching dietary counts:", error);
+                if (container && (!container.children.length || container.innerText.includes('Loading'))) {
+                    container.innerHTML = '<p style="color: #e53e3e;">Failed to load counts.</p>';
+                }
+            }
+        }
+
+        function renderUsageCharts() {
+            const selector = document.getElementById('weekSelector');
+            const selectedWeek = selector ? selector.value : '';
+
+            const normalizeDate = (d) => {
+                if (!d) return '';
+                try {
+                    return new Date(d).toISOString().split('T')[0];
+                } catch (e) {
+                    return String(d);
+                }
+            };
+
+            const selectedDateKey = normalizeDate(selectedWeek);
+            const weekData = selectedDateKey
+                ? allFetchedFeedback.filter(m => normalizeDate(m.week_start) === selectedDateKey)
+                : [];
+
+            // Update Active Week Label
+            const activeWeekLabel = document.getElementById('chartActiveWeekLabel');
+            if (activeWeekLabel && selector && selector.selectedIndex >= 0) {
+                activeWeekLabel.innerText = selector.options[selector.selectedIndex].text;
+            }
+
+            // Summary Stats calculation
+            let totalReviews = 0;
+            let sumRatings = 0;
+            weekData.forEach(meal => {
+                if (meal.ratingCount > 0) {
+                    totalReviews += meal.ratingCount;
+                    if (meal.feedbacks && meal.feedbacks.length > 0) {
+                        meal.feedbacks.forEach(fb => { sumRatings += fb.rating; });
+                    } else {
+                        sumRatings += (meal.averageRating * meal.ratingCount);
+                    }
+                }
+            });
+
+            const avgRating = totalReviews > 0 ? (sumRatings / totalReviews).toFixed(1) : null;
+            const statsContainer = document.getElementById('chartSummaryStats');
+            if (statsContainer) {
+                statsContainer.innerHTML = `
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #4a5568;">
+                        <i class="ri-feedback-line" style="color: var(--primary-terracotta);"></i>
+                        <span>Total Reviews: <strong>${totalReviews}</strong></span>
+                    </div>
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 6px 12px; display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: #4a5568;">
+                        <i class="ri-star-fill" style="color: #ecc94b;"></i>
+                        <span>Week Avg: <strong>${avgRating ? avgRating + ' / 5' : 'No ratings yet'}</strong></span>
+                    </div>
+                `;
+            }
+
+            const daysOrder = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+
+            const getMealAverage = (day, mealType) => {
+                const meal = weekData.find(m => m.day.toLowerCase() === day.toLowerCase() && m.meal_type.toLowerCase() === mealType.toLowerCase());
+                return (meal && meal.ratingCount > 0) ? parseFloat(meal.averageRating.toFixed(2)) : 0;
+            };
+
+            const bfastRatings = daysOrder.map(day => getMealAverage(day, 'Breakfast'));
+            const lunchRatings = daysOrder.map(day => getMealAverage(day, 'Lunch'));
+            const dinnerRatings = daysOrder.map(day => getMealAverage(day, 'Dinner'));
+
+            if (charts.weeklyMeal) {
+                charts.weeklyMeal.destroy();
+            }
+
+            const canvas = document.getElementById('weeklyMealChart');
+            if (canvas) {
+                charts.weeklyMeal = new Chart(canvas.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: daysOrder,
+                        datasets: [
+                            {
+                                label: 'Breakfast',
+                                data: bfastRatings,
+                                backgroundColor: '#f59e0b',
+                                hoverBackgroundColor: '#d97706',
+                                borderRadius: 6,
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.82
+                            },
+                            {
+                                label: 'Lunch',
+                                data: lunchRatings,
+                                backgroundColor: '#10b981',
+                                hoverBackgroundColor: '#059669',
+                                borderRadius: 6,
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.82
+                            },
+                            {
+                                label: 'Dinner',
+                                data: dinnerRatings,
+                                backgroundColor: '#6366f1',
+                                hoverBackgroundColor: '#4f46e5',
+                                borderRadius: 6,
+                                barPercentage: 0.8,
+                                categoryPercentage: 0.82
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        interaction: {
+                            mode: 'nearest',
+                            axis: 'x',
+                            intersect: false
+                        },
+                        onClick: (event, elements, chart) => {
+                            let points = chart.getElementsAtEventForMode(event, 'nearest', { intersect: true }, false);
+                            if (!points || points.length === 0) {
+                                points = chart.getElementsAtEventForMode(event, 'nearest', { intersect: false }, false);
+                            }
+                            if (points && points.length > 0) {
+                                const pt = points[0];
+                                const clickedDay = daysOrder[pt.index];
+                                const mealTypes = ['Breakfast', 'Lunch', 'Dinner'];
+                                const clickedMeal = mealTypes[pt.datasetIndex];
+                                showMealDetail(clickedDay, clickedMeal);
+                            }
+                        },
+                        onHover: (event, chartElement) => {
+                            event.native.target.style.cursor = chartElement.length ? 'pointer' : 'default';
+                        },
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    boxWidth: 14,
+                                    boxHeight: 14,
+                                    borderRadius: 4,
+                                    useBorderRadius: true,
+                                    font: { weight: '600', size: 12 }
+                                }
+                            },
+                            tooltip: {
+                                padding: 12,
+                                titleFont: { size: 13, weight: 'bold' },
+                                bodyFont: { size: 12 },
+                                callbacks: {
+                                    label: function (ctx) {
+                                        const val = ctx.raw;
+                                        const mealType = ctx.dataset.label;
+                                        const day = ctx.label;
+                                        const meal = weekData.find(m => m.day.toLowerCase() === day.toLowerCase() && m.meal_type.toLowerCase() === mealType.toLowerCase());
+                                        if (!meal || !meal.ratingCount || meal.ratingCount === 0) {
+                                            return ` ${mealType}: No ratings yet (Click to view menu items)`;
+                                        }
+                                        return ` ${mealType}: ${val} ⭐ (${meal.ratingCount} reviews) — Click to view`;
+                                    }
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                min: 0,
+                                max: 5,
+                                ticks: {
+                                    stepSize: 1,
+                                    callback: function (val) {
+                                        if (val === 0) return '0';
+                                        return val + ' ⭐';
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Rating (1 to 5 Stars)',
+                                    font: { weight: 'bold', size: 12 },
+                                    color: '#4a5568'
+                                },
+                                grid: {
+                                    color: '#edf2f7'
+                                }
+                            },
+                            x: {
+                                ticks: {
+                                    callback: function (val, index) {
+                                        if (window.innerWidth < 640) {
+                                            return ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][index];
+                                        }
+                                        return daysOrder[index];
+                                    },
+                                    font: { weight: '600', size: 11 }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Days of the Week',
+                                    font: { weight: 'bold', size: 12 },
+                                    color: '#4a5568'
+                                },
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // If a meal was previously opened, refresh its contents for the newly selected week
+            if (currentSelectedDay && currentSelectedMealType) {
+                showMealDetail(currentSelectedDay, currentSelectedMealType, currentRatingFilter, false);
+            } else {
+                closeMealDetail();
+            }
+        }
+
+        function showMealDetail(day, mealType, ratingFilter = 'ALL', shouldScroll = true) {
+            currentSelectedDay = day;
+            currentSelectedMealType = mealType;
+            currentRatingFilter = ratingFilter;
+
+            const selector = document.getElementById('weekSelector');
+            const selectedWeek = selector ? selector.value : '';
+
+            const normalizeDate = (d) => {
+                if (!d) return '';
+                try {
+                    return new Date(d).toISOString().split('T')[0];
+                } catch (e) {
+                    return String(d);
+                }
+            };
+
+            const selectedDateKey = normalizeDate(selectedWeek);
+            const weekData = selectedDateKey
+                ? allFetchedFeedback.filter(m => normalizeDate(m.week_start) === selectedDateKey)
+                : [];
+
+            const meal = weekData.find(m =>
+                m.day.toLowerCase() === day.toLowerCase() &&
+                m.meal_type.toLowerCase() === mealType.toLowerCase()
+            );
+
+            const card = document.getElementById('mealDetailCard');
+            const placeholder = document.getElementById('mealDetailPlaceholder');
+            if (!card) return;
+
+            if (placeholder) placeholder.style.display = 'none';
+            card.style.display = 'block';
+
+            // Items & Timing
+            const items = (meal && Array.isArray(meal.items)) ? meal.items : [];
+            const timeStr = meal ? `${meal.start_time || '07:30 AM'} - ${meal.end_time || '09:30 AM'}` : 'Timings not specified';
+            const feedbacks = (meal && Array.isArray(meal.feedbacks)) ? meal.feedbacks : [];
+            const ratingCount = meal ? (meal.ratingCount || 0) : 0;
+            const avgRating = (meal && meal.ratingCount > 0) ? meal.averageRating : 0;
+
+            // Rating counts for 1..5 stars
+            const counts = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 };
+            feedbacks.forEach(fb => {
+                if (counts[fb.rating] !== undefined) counts[fb.rating]++;
+            });
+
+            // Meal icon & color styling
+            let mealIcon = 'ri-cup-line';
+            let mealColor = '#f59e0b';
+            if (mealType.toLowerCase() === 'lunch') {
+                mealIcon = 'ri-restaurant-line';
+                mealColor = '#10b981';
+            } else if (mealType.toLowerCase() === 'dinner') {
+                mealIcon = 'ri-bowl-line';
+                mealColor = '#6366f1';
+            }
+
+            // Quick meal tabs for the same day
+            const quickTabsHtml = ['Breakfast', 'Lunch', 'Dinner'].map(mt => {
+                const isActive = mt.toLowerCase() === mealType.toLowerCase();
+                const btnBg = isActive ? 'var(--primary-terracotta)' : '#f8fafc';
+                const btnColor = isActive ? '#ffffff' : '#4a5568';
+                const btnBorder = isActive ? 'var(--primary-terracotta)' : '#cbd5e0';
+                return `<button type="button" onclick="showMealDetail('${day}', '${mt}', 'ALL', false)" style="padding: 6px 14px; border-radius: 999px; border: 1px solid ${btnBorder}; background: ${btnBg}; color: ${btnColor}; font-size: 0.82rem; font-weight: 700; cursor: pointer; transition: 0.2s;">${mt}</button>`;
+            }).join('');
+
+            // Build a lookup map of item ratings from meal.dailyRatings:
+            const itemRatingsMap = {};
+            if (meal && Array.isArray(meal.dailyRatings)) {
+                meal.dailyRatings.forEach(dr => {
+                    if (!dr.item_name) return;
+                    const key = dr.item_name.trim().toLowerCase();
+                    if (!itemRatingsMap[key]) {
+                        itemRatingsMap[key] = { sum: 0, count: 0, ratings: [] };
+                    }
+                    itemRatingsMap[key].sum += dr.rating;
+                    itemRatingsMap[key].count += 1;
+                    itemRatingsMap[key].ratings.push(dr.rating);
+                });
+            }
+
+            // Food items with specific ratings
+            let lowRatedItems = [];
+            let highRatedItems = [];
+            let itemsCardsHtml = '';
+
+            if (items.length > 0) {
+                itemsCardsHtml = items.map(item => {
+                    const key = item.trim().toLowerCase();
+                    const stat = itemRatingsMap[key];
+                    const hasRating = stat && stat.count > 0;
+                    const avg = hasRating ? parseFloat((stat.sum / stat.count).toFixed(1)) : null;
+                    const cnt = hasRating ? stat.count : 0;
+
+                    let cardBg = '#f8fafc';
+                    let cardBorder = '#e2e8f0';
+                    let badgeHtml = '';
+                    let statusText = '';
+
+                    if (hasRating) {
+                        if (avg >= 4.0) {
+                            cardBg = '#f0fdf4';
+                            cardBorder = '#bbf7d0';
+                            badgeHtml = `<span style="background: #dcfce7; color: #166534; font-weight: 700; font-size: 0.8rem; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="ri-star-fill" style="color: #16a34a;"></i> ${avg} / 5
+                            </span>`;
+                            statusText = `<span style="color: #16a34a; font-size: 0.75rem; font-weight: 600;">Popular (${cnt} ${cnt === 1 ? 'rating' : 'ratings'})</span>`;
+                            highRatedItems.push({ item, avg, cnt });
+                        } else if (avg >= 2.6) {
+                            cardBg = '#fefce8';
+                            cardBorder = '#fef08a';
+                            badgeHtml = `<span style="background: #fef9c3; color: #854d0e; font-weight: 700; font-size: 0.8rem; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="ri-star-fill" style="color: #ca8a04;"></i> ${avg} / 5
+                            </span>`;
+                            statusText = `<span style="color: #854d0e; font-size: 0.75rem; font-weight: 600;">Average (${cnt} ${cnt === 1 ? 'rating' : 'ratings'})</span>`;
+                        } else {
+                            cardBg = '#fff5f5';
+                            cardBorder = '#fecaca';
+                            badgeHtml = `<span style="background: #fee2e2; color: #991b1b; font-weight: 800; font-size: 0.8rem; padding: 3px 8px; border-radius: 999px; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="ri-alert-fill" style="color: #dc2626;"></i> ${avg} / 5
+                            </span>`;
+                            statusText = `<span style="color: #dc2626; font-size: 0.75rem; font-weight: 700;">Needs Change! (${cnt} ${cnt === 1 ? 'rating' : 'ratings'})</span>`;
+                            lowRatedItems.push({ item, avg, cnt });
+                        }
+                    } else {
+                        badgeHtml = `<span style="background: #f1f5f9; color: #64748b; font-size: 0.75rem; font-weight: 600; padding: 2px 7px; border-radius: 999px;">Unrated</span>`;
+                        statusText = `<span style="color: #94a3b8; font-size: 0.75rem;">No individual ratings yet</span>`;
+                    }
+
+                    return `
+                        <div style="flex: 1 1 200px; min-width: 0; max-width: 100%; background: ${cardBg}; border: 1px solid ${cardBorder}; border-radius: 10px; padding: 12px 14px; display: flex; flex-direction: column; justify-content: space-between; gap: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;">
+                                <strong style="color: #1e293b; font-size: 0.92rem; line-height: 1.3;">${item}</strong>
+                                ${badgeHtml}
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed ${cardBorder}; padding-top: 6px;">
+                                ${statusText}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                itemsCardsHtml = '<p style="color: #a0aec0; font-size: 0.88rem; font-style: italic; margin: 0;">No food items specified in the uploaded menu for this meal.</p>';
+            }
+
+            let recommendationHtml = '';
+            if (lowRatedItems.length > 0) {
+                const lowNames = lowRatedItems.map(l => `<strong>${l.item} (${l.avg} ⭐)</strong>`).join(', ');
+                recommendationHtml = `
+                    <div style="background: #fff5f5; border: 1px solid #fecaca; border-left: 5px solid #ef4444; border-radius: 10px; padding: 14px 16px; margin-top: 14px; display: flex; align-items: flex-start; gap: 12px;">
+                        <i class="ri-error-warning-fill" style="color: #ef4444; font-size: 1.35rem; flex-shrink: 0; margin-top: 2px;"></i>
+                        <div>
+                            <h6 style="margin: 0 0 4px 0; color: #991b1b; font-size: 0.95rem; font-weight: 700;">Action Required for Next Menu: Low Rated Items Detected</h6>
+                            <p style="margin: 0; color: #7f1d1d; font-size: 0.86rem; line-height: 1.45;">
+                                Students gave low ratings to ${lowNames}. The mess committee recommends replacing these dishes with alternative recipes for the upcoming menu.
+                            </p>
+                        </div>
+                    </div>
+                `;
+            } else if (highRatedItems.length > 0 && lowRatedItems.length === 0) {
+                recommendationHtml = `
+                    <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 5px solid #22c55e; border-radius: 10px; padding: 12px 16px; margin-top: 14px; display: flex; align-items: center; gap: 10px;">
+                        <i class="ri-thumb-up-fill" style="color: #22c55e; font-size: 1.25rem;"></i>
+                        <p style="margin: 0; color: #166534; font-size: 0.85rem; font-weight: 600;">
+                            All rated dishes in this meal maintained positive student satisfaction (>= 3.0 ⭐). Keep these dishes on the menu rotation.
+                        </p>
+                    </div>
+                `;
+            }
+
+            // Ratings summary & Breakdown
+            let ratingOverviewHtml = '';
+            if (ratingCount > 0) {
+                const filledStars = '★'.repeat(Math.round(avgRating));
+                const emptyStars = '☆'.repeat(5 - Math.round(avgRating));
+
+                // Star progress bars (5 down to 1)
+                const breakdownBarsHtml = [5, 4, 3, 2, 1].map(star => {
+                    const count = counts[star];
+                    const percent = ratingCount > 0 ? ((count / ratingCount) * 100).toFixed(0) : 0;
+                    return `
+                        <div style="display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: #4a5568;">
+                            <span style="width: 55px; font-weight: 600;">${star} Stars</span>
+                            <div style="flex: 1; height: 8px; background: #edf2f7; border-radius: 999px; overflow: hidden;">
+                                <div style="height: 100%; width: ${percent}%; background: ${star >= 4 ? '#10b981' : (star === 3 ? '#ecc94b' : '#ef4444')}; border-radius: 999px;"></div>
+                            </div>
+                            <span style="width: 30px; text-align: right; color: #718096; font-weight: 600;">${count}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                ratingOverviewHtml = `
+                    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px;">
+                        <div style="display: flex; align-items: baseline; gap: 8px; margin-bottom: 15px;">
+                            <span style="font-size: 2rem; font-weight: 800; color: #2d3748;">${avgRating.toFixed(1)}</span>
+                            <span style="font-size: 1.1rem; color: #f59e0b;">${filledStars}${emptyStars}</span>
+                            <span style="font-size: 0.88rem; color: #718096; margin-left: 4px;">(${ratingCount} verified student reviews)</span>
+                        </div>
+                        <div style="display: flex; flex-direction: column; gap: 6px; max-width: 450px;">
+                            ${breakdownBarsHtml}
+                        </div>
+                    </div>
+                `;
+            } else {
+                ratingOverviewHtml = `
+                    <div style="background: #fffaf0; border: 1px solid #feebc8; border-radius: 12px; padding: 20px; text-align: center;">
+                        <p style="margin: 0; color: #9c4221; font-weight: 600; font-size: 0.92rem;">
+                            <i class="ri-information-line"></i> No student ratings submitted yet for this meal.
+                        </p>
+                        <p style="margin: 5px 0 0 0; color: #7b341e; font-size: 0.82rem;">
+                            As students submit feedback during or after this meal, their 1-to-5 star ratings will appear here automatically.
+                        </p>
+                    </div>
+                `;
+            }
+
+            card.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #edf2f7; padding-bottom: 16px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 6px;">
+                            <span style="background: ${mealColor}20; color: ${mealColor}; width: 36px; height: 36px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; font-size: 1.25rem;">
+                                <i class="${mealIcon}"></i>
+                            </span>
+                            <h4 style="margin: 0; color: #2d3748; font-size: 1.25rem; font-weight: 800;">${day} - ${mealType}</h4>
+                            <span style="background: #edf2f7; color: #4a5568; font-size: 0.78rem; font-weight: 600; padding: 3px 8px; border-radius: 6px; display: flex; align-items: center; gap: 4px;">
+                                <i class="ri-time-line"></i> ${timeStr}
+                            </span>
+                        </div>
+                        <p style="margin: 0; color: #718096; font-size: 0.88rem;">Detailed performance report & student ratings for this meal.</p>
+                    </div>
+
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="display: flex; gap: 6px; background: #f1f5f9; padding: 3px; border-radius: 999px;">
+                            ${quickTabsHtml}
+                        </div>
+                        <button type="button" onclick="closeMealDetail()" title="Close details" style="background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #64748b; font-size: 1.1rem; transition: background 0.2s;">
+                            <i class="ri-close-line"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Food Items Section with Granular Item Ratings -->
+                <div style="margin-bottom: 24px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px; margin-bottom: 14px;">
+                        <div>
+                            <h5 style="margin: 0; color: #1e293b; font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 8px;">
+                                <i class="ri-restaurant-2-line" style="color: var(--primary-terracotta); font-size: 1.15rem;"></i> Food Items & Specific Dish Ratings
+                            </h5>
+                            <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.83rem;">
+                                Average student satisfaction rating for each individual dish. Use these scores to identify which items to keep or replace in next menu.
+                            </p>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                        ${itemsCardsHtml}
+                    </div>
+                    ${recommendationHtml}
+                </div>
+
+                <!-- Ratings Breakdown Section -->
+                ${ratingOverviewHtml}
+            `;
+
+            if (shouldScroll) {
+                document.getElementById('mealDetailContainer').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function closeMealDetail() {
+            currentSelectedDay = null;
+            currentSelectedMealType = null;
+            const card = document.getElementById('mealDetailCard');
+            const placeholder = document.getElementById('mealDetailPlaceholder');
+            if (card) card.style.display = 'none';
+            if (placeholder) placeholder.style.display = 'block';
+        }
+
+        function openPhotoViewer(url, caption) {
+            const modal = document.getElementById('photoViewerModal');
+            const img = document.getElementById('modalFullImage');
+            const cap = document.getElementById('modalPhotoCaption');
+            if (modal && img) {
+                img.src = url;
+                if (cap) cap.innerText = caption || 'Food review photo';
+                modal.style.display = 'flex';
+            }
+        }
+
+        function closePhotoViewer() {
+            const modal = document.getElementById('photoViewerModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        // --- 5. MESS SETTINGS LOGIC ---
+
+        async function viewCurrentMenuImage() {
+            try {
+                const res = await fetch(`http://localhost:5000/api/menus/latest-image/${BHAWAN_ID}`);
+                const data = await res.json();
+                if (data.url) {
+                    window.open(data.url, '_blank');
+                } else {
+                    alert("No menu document found. Please upload a menu first.");
+                }
+            } catch (error) {
+                alert("Failed to fetch menu document.");
+            }
+        }
+
+        async function deleteLatestMenuUpload() {
+            if (!confirm("Are you sure you want to delete the ENTIRE latest uploaded menu? This will remove all meals and ratings for the current week, but preserve older weeks.")) return;
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/menus/latest-week/${BHAWAN_ID}`, { method: 'DELETE' });
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert("Latest menu upload deleted completely. You can now re-upload the correct menu.");
+                    fetchActiveMenus();
+                } else {
+                    alert("Error: " + (data.error || "Failed to delete."));
+                }
+            } catch (error) {
+                alert("Network error.");
+            }
+        }
+
+        async function fetchActiveMenus() {
+            const container = document.getElementById('menuListContainer');
+            container.innerHTML = '<p>Loading menus...</p>';
+            try {
+                const response = await fetch(`http://localhost:5000/api/menus/bhawan/${BHAWAN_ID}`);
+                const menus = await response.json();
+                if (menus.length === 0) return container.innerHTML = '<p style="color: #718096;">No active menus found.</p>';
+
+                let html = '';
+                menus.forEach(menu => {
+                    html += `
+                        <div class="menu-item-row" style="flex-wrap: wrap; gap: 10px;">
+                            <div style="flex: 1; min-width: 200px;">
+                                <strong>${menu.day} - ${menu.meal_type}</strong><br>
+                                <span style="font-size: 0.85rem; color: #718096;">📅 ${new Date(menu.week_start).toLocaleDateString()} | ⏰ ${menu.start_time} to ${menu.end_time}</span>
+                            </div>
+                            <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                <button class="btn-outline" onclick="openTimeModal('${menu.id}', '${menu.day}', '${menu.meal_type}', '${menu.start_time}', '${menu.end_time}')"><i class="ri-time-line"></i> Edit Time</button>
+                                <button class="btn-danger" onclick="deleteMenu('${menu.id}')"><i class="ri-delete-bin-line"></i> Delete</button>
+                            </div>
+                        </div>`;
+                });
+                container.innerHTML = html;
+            } catch (error) { container.innerHTML = '<p style="color: red;">Failed to load menus.</p>'; }
+        }
+
+        async function deleteMenu(menuId) {
+            if (!confirm("Are you sure you want to delete this specific meal?")) return;
+            try {
+                const response = await fetch(`http://localhost:5000/api/menus/${menuId}`, { method: 'DELETE' });
+                if (response.ok) fetchActiveMenus();
+                else alert("Failed to delete menu.");
+            } catch (error) { alert("Network error."); }
+        }
+
+        function openTimeModal(id, day, mealType, currentStart, currentEnd) {
+            document.getElementById('editMenuId').value = id;
+            document.getElementById('timeModalTitle').innerText = `Updating time for ${day} ${mealType}`;
+            document.getElementById('editStartTime').value = "";
+            document.getElementById('editEndTime').value = "";
+            document.getElementById('timeModal').style.display = 'flex';
+        }
+
+        function closeTimeModal() {
+            document.getElementById('timeModal').style.display = 'none';
+        }
+
+        async function submitTimeEdit() {
+            const menuId = document.getElementById('editMenuId').value;
+            const rawStart = document.getElementById('editStartTime').value;
+            const rawEnd = document.getElementById('editEndTime').value;
+
+            if (!rawStart || !rawEnd) return alert("Please select both a start and end time.");
+
+            const formatTime = (timeStr) => {
+                let [hours, minutes] = timeStr.split(':');
+                let ampm = hours >= 12 ? 'PM' : 'AM';
+                hours = hours % 12 || 12;
+                return `${hours}:${minutes} ${ampm}`;
+            };
+
+            const start_time = formatTime(rawStart);
+            const end_time = formatTime(rawEnd);
+
+            try {
+                const response = await fetch(`http://localhost:5000/api/menus/${menuId}/time`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ start_time, end_time })
+                });
+
+                if (response.ok) {
+                    closeTimeModal();
+                    fetchActiveMenus();
+                } else {
+                    alert("Failed to update time.");
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Network error.");
+            }
+        }
+
+        // --- 6. UPLOAD MENU EVENT LISTENER ---
+        document.getElementById('uploadForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Processing Data..."; btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('bhawanId', BHAWAN_ID);
+            formData.append('startDate', document.getElementById('startDate').value);
+            formData.append('endDate', document.getElementById('endDate').value);
+            formData.append('menuFile', document.getElementById('menuFile').files[0]);
+
+            ['secSign', 'asstWardenSign', 'hrSign', 'ccbSign', 'wardenSign'].forEach(id => {
+                const fileInput = document.getElementById(id);
+                if (fileInput && fileInput.files.length > 0) formData.append(id, fileInput.files[0]);
+            });
+
+            try {
+                const response = await fetch("http://localhost:5000/api/menus/upload", { method: 'POST', body: formData });
+                if (response.ok) {
+                    alert("Success! The new menu is live. Previous menu reports are saved in history.");
+                    document.getElementById('uploadForm').reset();
+                    document.getElementById('fileName').innerText = 'No file chosen';
+
+                    const sel = document.getElementById('weekSelector');
+                    if (sel) sel.value = '';
+                    closeMealDetail();
+                    await fetchFeedbackData();
+                    if (typeof fetchActiveMenus === 'function') await fetchActiveMenus();
+                    await initUsageReports();
+                } else {
+                    const err = await response.json().catch(() => ({}));
+                    alert("Failed to upload menu: " + (err.error || "Please verify the document."));
+                }
+            } catch (error) { alert("Network Error."); }
+            btn.innerText = "Upload Menu & Process Data"; btn.disabled = false;
+        });
+        // --- 7. TOGGLE SIDEBAR ---
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('open');
+            document.getElementById('sidebarOverlay').classList.toggle('show');
+        }
+
+        // --- 8. INITIAL TAB ROUTING & PREFETCHING ---
+        window.addEventListener('DOMContentLoaded', () => {
+            updateAlertBadge();
+            // Background prefetch data immediately so all tabs load in 0ms
+            fetchFeedbackData();
+            fetchDietaryCounts();
+
+            const hash = window.location.hash.replace('#', '');
+            if (['upload', 'alerts', 'reports', 'settings'].includes(hash)) {
+                switchStaffTab(hash);
+            }
+        });
+    </script>
+
+    <!-- Food Review Photo Modal -->
+    <div id="photoViewerModal"
+        style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 99999; justify-content: center; align-items: center; padding: 20px;"
+        onclick="if(event.target === this) closePhotoViewer();">
+        <div
+            style="position: relative; max-width: 90%; max-height: 90%; display: flex; flex-direction: column; align-items: center;">
+            <button type="button" onclick="closePhotoViewer()"
+                style="position: absolute; top: -45px; right: 0; background: transparent; border: none; color: white; font-size: 2rem; cursor: pointer;">
+                <i class="ri-close-line"></i>
+            </button>
+            <img id="modalFullImage" src="" alt="Full view"
+                style="max-width: 100%; max-height: 80vh; border-radius: 8px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5); object-fit: contain;">
+            <p id="modalPhotoCaption" style="color: #e2e8f0; margin-top: 12px; font-size: 0.9rem; text-align: center;">
+            </p>
+        </div>
+    </div>
+</body>
+
+</html>

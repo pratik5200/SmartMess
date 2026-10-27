@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartMess - Create your account</title>
+    <link rel="icon" type="image/svg+xml" href="/smartmess_logo_vector.svg" />
+    <link rel="shortcut icon" href="/smartmess_logo_vector.svg" />
+    <link rel="apple-touch-icon" href="/smartmess_logo_vector.svg" />
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+
+    <!-- Remix Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.2.0/fonts/remixicon.css" rel="stylesheet" />
+
+    <style>
+        :root {
+            --primary-green: #5F7751;
+            --primary-green-hover: #4E6342;
+            --primary-green-active: #405236;
+            --text-dark: #231F1D;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            --bg-hero: #FEFCF6;
+            --surface-white: #FFFFFF;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            min-height: 100vh;
+            font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--surface-white);
+            color: var(--text-dark);
+            overflow-x: hidden;
+        }
+
+        .login-page {
+            display: flex;
+            min-height: 100vh;
+            width: 100%;
+        }
+
+        /* --- LEFT HERO BANNER --- */
+        .hero-column {
+            flex: 1.12;
+            background: var(--bg-hero);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 30px 40px;
+            border-right: 1px solid #F0ECE4;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-image {
+            width: 100%;
+            max-width: 680px;
+            max-height: 94vh;
+            height: auto;
+            object-fit: contain;
+            display: block;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        /* --- RIGHT FORM SECTION --- */
+        .form-column {
+            flex: 0.88;
+            background: var(--surface-white);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 64px;
+            overflow-y: auto;
+        }
+
+        .form-container {
+            width: 100%;
+            max-width: 440px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .welcome-heading {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-dark);
+            letter-spacing: -0.6px;
+            line-height: 1.2;
+            margin-bottom: 8px;
+        }
+
+        .welcome-subtitle {
+            font-size: 1rem;
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            font-weight: 400;
+            line-height: 1.45;
+        }
+
+        /* Input fields with icons */
+        .input-group {
+            position: relative;
+            display: flex;
+            align-items: center;
+            background: #FFFFFF;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 0 16px;
+            margin-bottom: 16px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .input-group:focus-within {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3.5px rgba(95, 119, 81, 0.15);
+        }
+
+        .input-icon {
+            font-size: 1.25rem;
+            color: #9CA3AF;
+            margin-right: 12px;
+            flex-shrink: 0;
+            transition: color 0.2s;
+        }
+
+        .input-group:focus-within .input-icon {
+            color: var(--primary-green);
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 0.98rem;
+            color: var(--text-dark);
+            font-family: 'DM Sans', sans-serif;
+            padding: 15px 0;
+        }
+
+        .input-group select {
+            cursor: pointer;
+            color: var(--text-dark);
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            padding-right: 28px;
+        }
+
+        .select-arrow {
+            position: absolute;
+            right: 16px;
+            color: #9CA3AF;
+            font-size: 1.25rem;
+            pointer-events: none;
+            transition: color 0.2s;
+        }
+
+        .input-group:focus-within .select-arrow {
+            color: var(--primary-green);
+        }
+
+        .input-group input::placeholder {
+            color: #9CA3AF;
+            font-weight: 400;
+        }
+
+        .eye-toggle-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #9CA3AF;
+            font-size: 1.25rem;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+        }
+
+        .eye-toggle-btn:hover {
+            color: var(--text-dark);
+        }
+
+        /* Primary button */
+        .btn-login {
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--primary-green);
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 3px 8px rgba(95, 119, 81, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .btn-login:hover {
+            background: var(--primary-green-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(95, 119, 81, 0.3);
+        }
+
+        .btn-login:active {
+            background: var(--primary-green-active);
+            transform: translateY(0);
+        }
+
+        .btn-login:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Divider "or" */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 24px 0;
+            color: #9CA3AF;
+            font-size: 0.88rem;
+            font-weight: 500;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1.5px solid var(--border-color);
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: 14px;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: 14px;
+        }
+
+        /* Continue with Google button */
+        .btn-google {
+            width: 100%;
+            background: #FFFFFF;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            padding: 13px 20px;
+            font-size: 0.98rem;
+            font-weight: 600;
+            font-family: 'DM Sans', sans-serif;
+            color: var(--text-dark);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-google:hover {
+            background-color: #F9FAFB;
+            border-color: #D1D5DB;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+        }
+
+        /* Switcher / Account link */
+        .account-switch-wrapper {
+            text-align: center;
+            margin-top: 26px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+        }
+
+        .account-switch-link {
+            color: var(--primary-green);
+            font-weight: 700;
+            text-decoration: none;
+            margin-left: 4px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .account-switch-link:hover {
+            color: var(--primary-green-hover);
+            text-decoration: underline;
+        }
+
+        /* Terms & Privacy footer */
+        .terms-text {
+            margin-top: 32px;
+            text-align: center;
+            font-size: 0.82rem;
+            color: #9CA3AF;
+            line-height: 1.5;
+        }
+
+        .terms-text a {
+            color: #6B7280;
+            text-decoration: underline;
+            transition: color 0.2s;
+        }
+
+        .terms-text a:hover {
+            color: var(--text-dark);
+        }
+
+        /* Error Notification Banner */
+        .error-msg {
+            color: #D9381E;
+            font-weight: 600;
+            margin-top: 18px;
+            display: none;
+            background: #FFF5F5;
+            padding: 12px 16px;
+            border-radius: 10px;
+            border: 1px solid #FED7D7;
+            font-size: 0.9rem;
+            text-align: center;
+            animation: fadeIn 0.2s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1080px) {
+            .hero-column {
+                padding: 24px;
+            }
+            .form-column {
+                padding: 40px 36px;
+            }
+        }
+
+        @media (max-width: 880px) {
+            .login-page {
+                flex-direction: column;
+            }
+            .hero-column {
+                flex: none;
+                padding: 24px 20px;
+                border-right: none;
+                border-bottom: 1px solid #F0ECE4;
+            }
+            .hero-image {
+                max-height: 380px;
+            }
+            .form-column {
+                flex: 1;
+                padding: 36px 24px 48px 24px;
+            }
+            .welcome-heading {
+                font-size: 1.95rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="login-page">
+        <!-- Left Hero Section with the illustration -->
+        <div class="hero-column">
+            <img id="heroImage"
+                 src="/smartmess_signup_hero.png" 
+                 alt="SmartMess - Join SmartMess for better meals." 
+                 class="hero-image" />
+        </div>
+
+        <!-- Right Form Section -->
+        <div class="form-column">
+            <div class="form-container">
+                <h1 class="welcome-heading">Create your account</h1>
+                <p class="welcome-subtitle">Join SmartMess and make your mess experience easier.</p>
+
+                <!-- Auth Form -->
+                <form id="signupForm">
+                    <!-- 1. Full Name -->
+                    <div class="input-group">
+                        <i class="ri-user-line input-icon"></i>
+                        <input type="text" id="fullName" placeholder="Full Name" autocomplete="name" required>
+                    </div>
+
+                    <!-- 2. Email address or student ID -->
+                    <div class="input-group">
+                        <i class="ri-mail-line input-icon"></i>
+                        <input type="text" id="identifier" placeholder="Email address or student ID" autocomplete="username" required>
+                    </div>
+
+                    <!-- 3. Password -->
+                    <div class="input-group">
+                        <i class="ri-lock-line input-icon"></i>
+                        <input type="password" id="password" placeholder="Password" autocomplete="new-password" required>
+                        <button type="button" class="eye-toggle-btn" id="togglePasswordBtn" title="Toggle password visibility">
+                            <i class="ri-eye-off-line" id="togglePasswordIcon"></i>
+                        </button>
+                    </div>
+
+                    <!-- 4. Confirm Password -->
+                    <div class="input-group">
+                        <i class="ri-lock-line input-icon"></i>
+                        <input type="password" id="confirmPassword" placeholder="Confirm Password" autocomplete="new-password" required>
+                        <button type="button" class="eye-toggle-btn" id="toggleConfirmPasswordBtn" title="Toggle confirm password visibility">
+                            <i class="ri-eye-off-line" id="toggleConfirmPasswordIcon"></i>
+                        </button>
+                    </div>
+
+                    <!-- 5. Select your hostel/mess -->
+                    <div class="input-group select-group">
+                        <i class="ri-building-line input-icon"></i>
+                        <select id="bhawanSelect" required>
+                            <option value="" disabled selected>Select your hostel/mess</option>
+                            <option value="Azad Bhawan">Azad Bhawan</option>
+                            <option value="Cautley Bhawan">Cautley Bhawan</option>
+                            <option value="Ganga Bhawan">Ganga Bhawan</option>
+                            <option value="Govind Bhawan">Govind Bhawan</option>
+                            <option value="Jawahar Bhawan">Jawahar Bhawan</option>
+                            <option value="Rajendra Bhawan">Rajendra Bhawan</option>
+                            <option value="Radhakrishnan Bhawan">Radhakrishnan Bhawan</option>
+                            <option value="Rajiv Bhawan">Rajiv Bhawan</option>
+                            <option value="Ravindra Bhawan">Ravindra Bhawan</option>
+                            <option value="Vivekanand Bhawan">Vivekanand Bhawan</option>
+                            <option value="Sarojini Bhawan">Sarojini Bhawan</option>
+                            <option value="Kasturba Bhawan">Kasturba Bhawan</option>
+                            <option value="Himalaya Bhawan">Himalaya Bhawan</option>
+                        </select>
+                        <i class="ri-arrow-down-s-line select-arrow"></i>
+                    </div>
+
+                    <!-- Optional Staff Passcode field (if staff) -->
+                    <div class="input-group" id="staffPasscodeGroup" style="display: none;">
+                        <i class="ri-shield-keyhole-line input-icon"></i>
+                        <input type="password" id="staffPasscode" placeholder="Staff Authorization Code (optional)">
+                    </div>
+
+                    <!-- Submit Button -->
+                    <button type="submit" id="submitBtn" class="btn-login">Create account</button>
+
+                    <!-- Switcher: Log in -->
+                    <div class="account-switch-wrapper">
+                        <span>Already have an account?</span>
+                        <a href="login.html" class="account-switch-link">Log in</a>
+                    </div>
+                </form>
+
+                <!-- Error Alert Message -->
+                <p id="errorText" class="error-msg"></p>
+
+                <!-- Terms and Privacy Policy -->
+                <p class="terms-text">
+                    By creating an account, you agree to our <a href="#" onclick="alert('SmartMess Terms of Service: Designed for IITR Mess Dining Facilities.'); return false;">Terms</a> and <a href="#" onclick="alert('SmartMess Privacy Policy: Your meal and hostel details are stored securely.'); return false;">Privacy Policy</a>.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Check existing session
+        const existingUser = JSON.parse(localStorage.getItem('smartmess_user'));
+        if (existingUser) {
+            window.location.replace('/');
+        }
+
+        const errorText = document.getElementById('errorText');
+
+        // Password Visibility Toggles
+        const passwordInput = document.getElementById('password');
+        const togglePasswordBtn = document.getElementById('togglePasswordBtn');
+        const togglePasswordIcon = document.getElementById('togglePasswordIcon');
+
+        if (togglePasswordBtn) {
+            togglePasswordBtn.addEventListener('click', () => {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                togglePasswordIcon.className = isPassword ? 'ri-eye-line' : 'ri-eye-off-line';
+            });
+        }
+
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const toggleConfirmPasswordBtn = document.getElementById('toggleConfirmPasswordBtn');
+        const toggleConfirmPasswordIcon = document.getElementById('toggleConfirmPasswordIcon');
+
+        if (toggleConfirmPasswordBtn) {
+            toggleConfirmPasswordBtn.addEventListener('click', () => {
+                const isPassword = confirmPasswordInput.type === 'password';
+                confirmPasswordInput.type = isPassword ? 'text' : 'password';
+                toggleConfirmPasswordIcon.className = isPassword ? 'ri-eye-line' : 'ri-eye-off-line';
+            });
+        }
+
+        function completeLogin(userData) {
+            if (!userData.bhawanName && userData.bhawan && userData.bhawan.name) {
+                userData.bhawanName = userData.bhawan.name;
+            }
+            if (!userData.name) {
+                const enteredName = document.getElementById('fullName') ? document.getElementById('fullName').value.trim() : "";
+                if (enteredName) userData.name = enteredName;
+            }
+            localStorage.setItem('smartmess_user', JSON.stringify(userData));
+            window.location.replace('/');
+        }
+
+        document.getElementById('signupForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            errorText.style.display = 'none';
+
+            const bhawanEl = document.getElementById('bhawanSelect');
+            const selectedBhawan = (bhawanEl && bhawanEl.value) ? bhawanEl.value : "";
+
+            if (!selectedBhawan) {
+                errorText.innerText = "Please select your hostel/mess to register.";
+                errorText.style.display = 'block';
+                return;
+            }
+
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                errorText.innerText = "Passwords do not match. Please try again.";
+                errorText.style.display = 'block';
+                return; 
+            }
+
+            const btn = document.getElementById('submitBtn');
+            const originalBtnText = btn.innerText;
+            btn.innerText = "Creating account...";
+            btn.disabled = true;
+
+            const fullNameVal = document.getElementById('fullName') ? document.getElementById('fullName').value.trim() : "";
+            const passcodeVal = document.getElementById('staffPasscode') ? document.getElementById('staffPasscode').value : "";
+            const userRoleVal = passcodeVal ? "STAFF" : "STUDENT";
+
+            const payload = {
+                role: userRoleVal,
+                name: fullNameVal,
+                identifier: document.getElementById('identifier').value,
+                password: password,
+                bhawanName: selectedBhawan,
+                staffPasscode: passcodeVal,
+                isSignUp: true
+            };
+
+            try {
+                const res = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const data = await res.json();
+
+                if (res.ok) {
+                    completeLogin(data.user);
+                } else {
+                    errorText.innerText = data.error || "Registration failed. Please check your details.";
+                    errorText.style.display = 'block';
+                }
+            } catch (err) {
+                errorText.innerText = "Network error connecting to backend.";
+                errorText.style.display = 'block';
+            } finally {
+                btn.innerText = originalBtnText;
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+
+</html>

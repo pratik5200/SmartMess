@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="560" height="540" viewBox="0 0 560 540">
+  <title>SmartMess leaf bowl logo</title>
+  <desc>Vector recreation of the provided green leaves and dark brown bowl mark.</desc>
+  <rect width="560" height="540" fill="none"/>
+  <!-- Large upright leaf -->
+  <path d="M244 266
+           C211 223 210 169 234 113
+           C255 65 292 35 334 28
+           C341 79 334 135 308 182
+           C291 213 268 241 244 266 Z"
+        fill="#8BA95C"/>
+  <path d="M245 258 C249 207 272 153 306 91"
+        fill="none" stroke="#F7F5ED" stroke-width="7"
+        stroke-linecap="round"/>
+  <!-- Small left leaf -->
+  <path d="M226 260
+           C185 258 149 239 126 207
+           C111 185 106 160 108 139
+           C145 141 177 158 198 185
+           C215 207 224 234 226 260 Z"
+        fill="#1F4A2B"/>
+  <path d="M220 253 C192 220 166 192 137 170"
+        fill="none" stroke="#F7F5ED" stroke-width="6.5"
+        stroke-linecap="round"/>
+  <!-- Curved stem / right-hand branch -->
+  <path d="M266 266
+           C286 226 314 193 352 171
+           C377 156 403 146 425 132"
+        fill="none" stroke="#32190F" stroke-width="19"
+        stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Bowl rim -->
+  <path d="M84 282
+           C84 276 89 272 96 272
+           H451
+           C459 272 464 278 461 286
+           L444 321
+           C419 374 364 418 280 427
+           C196 418 141 374 116 321 Z"
+        fill="#32190F"/>
+  <!-- White bowl interior / inner contour -->
+  <path d="M104 291
+           H441
+           L428 316
+           C405 361 354 397 280 406
+           C206 397 155 361 132 316 Z"
+        fill="#F8F6EF"/>
+  <!-- subtle warm lower bowl accent -->
+  <path d="M132 318
+           C158 367 208 399 280 407
+           C352 399 402 367 428 318"
+        fill="none" stroke="#32190F" stroke-width="8"
+        stroke-linecap="round"/>
+</svg>

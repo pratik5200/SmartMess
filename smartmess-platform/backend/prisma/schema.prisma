@@ -1,0 +1,132 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Bhawan {
+  id             String          @id @default(uuid())
+  name           String          @unique
+  users          User[]
+  menus          Menu[]
+  weeklyFeedback WeeklySummary[]
+
+  // Phase 4: Dynamic Staff Names & Signatures
+  messSecretaryName    String?
+  messSecretarySignUrl String?
+  asstWardenName       String?
+  asstWardenSignUrl    String?
+  managerHrName        String?
+  managerHrSignUrl     String?
+  managerCcbName       String?
+  managerCcbSignUrl    String?
+  messWardenName       String?
+  messWardenSignUrl    String?
+}
+
+model User {
+  id            String          @id @default(uuid())
+  email         String          @unique
+  roll_no       String?         @unique 
+  password      String?         // NEW: Password field
+  role          Role            @default(STUDENT)
+  bhawanId      String
+  bhawan        Bhawan          @relation(fields: [bhawanId], references: [id])
+  // NEW FIELDS
+  name        String?
+  profilePic  String?  @db.Text // @db.Text allows storing large Base64 image strings
+  dailyRatings  DailyFeedback[]
+  weeklyRatings WeeklySummary[]
+  feedbacks     Feedback[] 
+  mealSelections MealSelection[]     // Links User to the new photo feedback
+}
+
+enum Role {
+  STUDENT
+  SECRETARY
+  ADMIN
+}
+
+model Menu {
+  id            String          @id @default(uuid())
+  bhawanId      String
+  bhawan        Bhawan          @relation(fields: [bhawanId], references: [id])
+  week_start    DateTime
+  week_end      DateTime
+  day           String          
+  meal_type     String          
+  start_time    String          
+  end_time      String          
+  items         String[]        
+
+  // Phase 5: Rating Cache for quick frontend highlighting
+  averageRating Float           @default(0)
+  ratingCount   Int             @default(0)
+  
+  dailyRatings  DailyFeedback[] // FIX: Added missing reverse relation
+  feedbacks     Feedback[]      // Links to new photo/comment reviews
+  mealSelections MealSelection[]
+}
+
+model DailyFeedback {
+  id        String   @id @default(uuid())
+  studentId String?
+  student   User?    @relation(fields: [studentId], references: [id], onDelete: SetNull) // 2. Add ? and SetNull
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id])
+  item_name String   
+  rating    Int      
+  comment   String?
+  createdAt DateTime @default(now())
+}
+
+model WeeklySummary {
+  id          String   @id @default(uuid())
+  studentId   String?
+  student   User?    @relation(fields: [studentId], references: [id], onDelete: SetNull) // 2. Add ? and SetNull
+  bhawanId    String
+  bhawan      Bhawan   @relation(fields: [bhawanId], references: [id])
+  week_start  DateTime
+  overall     Int      
+  suggestions String?
+  createdAt   DateTime @default(now())
+
+}
+
+// Phase 5: Individual Student Feedback (With Photo Uploads)
+model Feedback {
+  id        String   @id @default(uuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id])
+  rating    Int      // 1 to 5
+  comment   String?  // Optional text comment
+  imageUrl  String?  // Optional uploaded photo of the food
+  createdAt DateTime @default(now())
+}
+
+// Phase 5: Automated Official Alerts (Cron Job targets this)
+model Alert {
+  id          String   @id @default(uuid())
+  type        String   
+  title       String
+  description String
+  menuId      String?  
+  isResolved  Boolean  @default(false) 
+  createdAt   DateTime @default(now())
+}
+model MealSelection {
+  id        String   @id @default(uuid())
+  studentId String
+  student   User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  menuId    String
+  menu      Menu     @relation(fields: [menuId], references: [id])
+  choice    String   // Will store "VEG" or "NON-VEG"
+  createdAt DateTime @default(now())
+
+  // Ensures a student can only pick one option per meal
+  @@unique([studentId, menuId])
+}
