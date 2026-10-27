@@ -281,6 +281,4 @@ If you modify <code>prisma/schema.prisma</code>, always re-run <code>npx prisma 
 
 ---
 
-## 📄 License
 
-This project is licensed under the [ISC License](LICENSE).
