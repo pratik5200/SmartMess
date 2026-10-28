@@ -6,9 +6,8 @@
 [![Express](https://img.shields.io/badge/Express-5.2-lightgrey?style=for-the-badge&logo=express)](https://expressjs.com/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Neon-blue?style=for-the-badge&logo=postgresql)](https://neon.tech/)
 [![Prisma](https://img.shields.io/badge/Prisma-7.1-indigo?style=for-the-badge&logo=prisma)](https://www.prisma.io/)
-[![Google Gemini](https://img.shields.io/badge/Gemini_AI-2.0-orange?style=for-the-badge&logo=google)](https://ai.google.dev/)
 
-> **SmartMess** is a modern, full-stack campus mess management and dining feedback platform. Built specifically for university hostels (Bhawans), it bridges the communication gap between students and mess administration by modernizing daily menu publication, dietary headcount tracking, multi-tier meal ratings, dish-level analytics, and instant critical alerts.
+> **SmartMess** is a modern, campus mess management and dining feedback platform, built specifically for university hostels (Bhawans). It bridges the communication gap between students and mess administration by modernizing daily menu publication, dietary headcount tracking, multi-tier meal ratings, dish-level analytics, and instant critical alerts.
 
 ---
 
@@ -114,48 +113,9 @@ smartmess/
             └── smartmess_logo_vector.svg
 ```
 
----
-
-## 📋 Prerequisites
-
-Before setting up the project locally, ensure you have the following installed on your machine:
-
-- **Node.js**: `v18.18.0` or higher (`v20.x` LTS recommended)
-- **npm**: `v9.x` or higher (bundled with Node.js)
-- **Git**: Installed and configured
-- **PostgreSQL Database**: A local PostgreSQL instance or a free cloud database instance from [Neon.tech](https://neon.tech/)
-- **Google Gemini API Key** *(Optional, for AI Menu OCR upload)*: Obtain from [Google AI Studio](https://aistudio.google.com/)
 
 ---
 
-## 🚀 Installation & Setup
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/pratik5200/SmartMess.git
-cd smartmess
-```
-
-### 2. Backend Dependencies
-
-Navigate to the `backend` directory and install the necessary dependencies:
-
-```bash
-cd smartmess-platform/backend
-npm install
-```
-
-### 3. Frontend Dependencies
-
-Open a new terminal window or navigate to the `frontend` directory and install its dependencies:
-
-```bash
-cd ../frontend
-npm install
-```
-
----
 
 ## 🔐 Environment Variables Setup
 
