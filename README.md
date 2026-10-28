@@ -16,8 +16,6 @@
 - [Features](#-features)
 - [Tech Stack Overview](#-tech-stack-overview)
 - [Folder Structure](#-folder-structure)
-- [Prerequisites](#-prerequisites)
-- [Installation & Setup](#-installation--setup)
 - [Environment Variables Setup](#-environment-variables-setup)
 - [Database Setup & Seeding](#-database-setup--seeding)
 - [Running Development Servers](#-running-development-servers)
