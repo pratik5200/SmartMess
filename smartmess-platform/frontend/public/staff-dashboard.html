@@ -1243,7 +1243,7 @@
                 localStorage.setItem('smartmess_user', JSON.stringify(loggedInUser));
             }
         } else if (loggedInUser.id) {
-            fetch(`http://localhost:5000/api/auth/profile/${loggedInUser.id}`)
+            fetch(`https://smartmess-0hqf.onrender.com/api/auth/profile/${loggedInUser.id}`)
                 .then(res => res.json())
                 .then(userData => {
                     const fetchedName = userData.bhawanName || (userData.bhawan && userData.bhawan.name);
@@ -1775,7 +1775,7 @@
             }
 
             try {
-                const res = await fetch(`http://localhost:5000/api/menus/selection-counts/${BHAWAN_ID}`);
+                const res = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/selection-counts/${BHAWAN_ID}`);
                 const data = await res.json();
                 try {
                     sessionStorage.setItem('smartmess_headcounts_' + BHAWAN_ID, JSON.stringify(data));
@@ -2298,7 +2298,7 @@
 
         async function viewCurrentMenuImage() {
             try {
-                const res = await fetch(`http://localhost:5000/api/menus/latest-image/${BHAWAN_ID}`);
+                const res = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/latest-image/${BHAWAN_ID}`);
                 const data = await res.json();
                 if (data.url) {
                     window.open(data.url, '_blank');
@@ -2314,7 +2314,7 @@
             if (!confirm("Are you sure you want to delete the ENTIRE latest uploaded menu? This will remove all meals and ratings for the current week, but preserve older weeks.")) return;
 
             try {
-                const response = await fetch(`http://localhost:5000/api/menus/latest-week/${BHAWAN_ID}`, { method: 'DELETE' });
+                const response = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/latest-week/${BHAWAN_ID}`, { method: 'DELETE' });
                 const data = await response.json();
 
                 if (response.ok) {
@@ -2332,7 +2332,7 @@
             const container = document.getElementById('menuListContainer');
             container.innerHTML = '<p>Loading menus...</p>';
             try {
-                const response = await fetch(`http://localhost:5000/api/menus/bhawan/${BHAWAN_ID}`);
+                const response = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/bhawan/${BHAWAN_ID}`);
                 const menus = await response.json();
                 if (menus.length === 0) return container.innerHTML = '<p style="color: #718096;">No active menus found.</p>';
 
@@ -2357,7 +2357,7 @@
         async function deleteMenu(menuId) {
             if (!confirm("Are you sure you want to delete this specific meal?")) return;
             try {
-                const response = await fetch(`http://localhost:5000/api/menus/${menuId}`, { method: 'DELETE' });
+                const response = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/${menuId}`, { method: 'DELETE' });
                 if (response.ok) fetchActiveMenus();
                 else alert("Failed to delete menu.");
             } catch (error) { alert("Network error."); }
@@ -2393,7 +2393,7 @@
             const end_time = formatTime(rawEnd);
 
             try {
-                const response = await fetch(`http://localhost:5000/api/menus/${menuId}/time`, {
+                const response = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/${menuId}/time`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ start_time, end_time })
@@ -2429,7 +2429,7 @@
             });
 
             try {
-                const response = await fetch("http://localhost:5000/api/menus/upload", { method: 'POST', body: formData });
+                const response = await fetch("https://smartmess-0hqf.onrender.com/api/menus/upload", { method: 'POST', body: formData });
                 if (response.ok) {
                     alert("Success! The new menu is live. Previous menu reports are saved in history.");
                     document.getElementById('uploadForm').reset();
