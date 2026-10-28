@@ -15,15 +15,6 @@ const nextConfig: NextConfig = {
     }
     return config
   },
-  async redirects() {
-    return [
-      {
-        source: "/index.html",
-        destination: "/student-dashboard.html",
-        permanent: false,
-      },
-    ];
-  },
   async headers() {
     return [
       {
