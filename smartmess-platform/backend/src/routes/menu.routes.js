@@ -249,8 +249,7 @@ function isMenuWeekCompleted(menu) {
 router.get("/today/:bhawanId", async (req, res) => {
   try {
     const { bhawanId } = req.params;
-    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-    const currentDay = days[new Date().getDay()];
+    const currentDay = getISTDayOfWeek();
 
     const latestMenu = await prisma.menu.findFirst({
       where: { bhawanId },
@@ -301,6 +300,37 @@ router.get("/week/:bhawanId", async (req, res) => {
 // Setup multer specifically for the single food photo upload
 const ratingUpload = multer({ storage: multer.memoryStorage() }).single('foodPhoto');
 
+function getISTMinutes() {
+  try {
+    const formatter = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Kolkata',
+      hour: 'numeric',
+      minute: 'numeric',
+      hour12: false
+    });
+    const parts = formatter.formatToParts(new Date());
+    let h = 0, m = 0;
+    for (const part of parts) {
+      if (part.type === 'hour') h = parseInt(part.value, 10);
+      if (part.type === 'minute') m = parseInt(part.value, 10);
+    }
+    if (h === 24) h = 0;
+    return h * 60 + m;
+  } catch (e) {
+    const now = new Date();
+    return now.getHours() * 60 + now.getMinutes();
+  }
+}
+
+function getISTDayOfWeek() {
+  try {
+    return new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Kolkata', weekday: 'long' }).format(new Date());
+  } catch (e) {
+    const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    return days[new Date().getDay()];
+  }
+}
+
 function parseTimeToMinutes(timeStr) {
   if (!timeStr) return 0;
   const match = timeStr.trim().match(/(\d+):(\d+)\s*(AM|PM)/i);
@@ -323,13 +353,13 @@ router.post("/rate/:menuId", ratingUpload, async (req, res) => {
         const menu = await prisma.menu.findUnique({ where: { id: menuId } });
         if (!menu) return res.status(404).json({ error: "Menu not found" });
 
-        // Time-lock verification:
+        // Time-lock verification (Indian Standard Time):
         // Opens at meal's start_time and remains open until midnight (12:00 AM / EOD)
-        const now = new Date();
-        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+        const currentMinutes = getISTMinutes();
         const mealStart = parseTimeToMinutes(menu.start_time);
 
-        if (currentMinutes < mealStart) {
+        // Allow a 2-minute buffer for client/server clock sync
+        if (currentMinutes + 2 < mealStart) {
             return res.status(403).json({ error: `Rating is not open yet. Opens at ${menu.start_time}.` });
         }
         

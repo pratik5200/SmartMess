@@ -482,9 +482,28 @@ export default function SmartMessHome() {
                 className={`${cardClass} cursor-pointer`}
                 onClick={() => {
                   if (s.title === "Give Feedbacks") {
-                    const now = new Date();
-                    const currentMinutes =
-                      now.getHours() * 60 + now.getMinutes();
+                    const getISTMinutes = () => {
+                      try {
+                        const formatter = new Intl.DateTimeFormat("en-US", {
+                          timeZone: "Asia/Kolkata",
+                          hour: "numeric",
+                          minute: "numeric",
+                          hour12: false,
+                        });
+                        const parts = formatter.formatToParts(new Date());
+                        let h = 0, m = 0;
+                        for (const part of parts) {
+                          if (part.type === "hour") h = parseInt(part.value, 10);
+                          if (part.type === "minute") m = parseInt(part.value, 10);
+                        }
+                        if (h === 24) h = 0;
+                        return h * 60 + m;
+                      } catch {
+                        const now = new Date();
+                        return now.getHours() * 60 + now.getMinutes();
+                      }
+                    };
+                    const currentMinutes = getISTMinutes();
                     let currentMeal = "Breakfast";
                     if (
                       currentMinutes >= 11 * 60 + 30 &&

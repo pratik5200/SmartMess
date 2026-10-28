@@ -1546,16 +1546,39 @@
             return hours * 60 + minutes;
         }
 
+        // Converts Indian Standard Time (Asia/Kolkata) to minutes from midnight
+        function getISTMinutes() {
+            try {
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    timeZone: 'Asia/Kolkata',
+                    hour: 'numeric',
+                    minute: 'numeric',
+                    hour12: false
+                });
+                const parts = formatter.formatToParts(new Date());
+                let h = 0, m = 0;
+                for (const part of parts) {
+                    if (part.type === 'hour') h = parseInt(part.value, 10);
+                    if (part.type === 'minute') m = parseInt(part.value, 10);
+                }
+                if (h === 24) h = 0;
+                return h * 60 + m;
+            } catch (e) {
+                const now = new Date();
+                return now.getHours() * 60 + now.getMinutes();
+            }
+        }
+
         // Checks if meal rating window is open for today:
         // Opens at start_time and stays open throughout the day until midnight (12:00 AM / EOD)
         function checkMealRatingOpen(meal) {
             if (!meal || !meal.start_time) return { isOpen: false, reason: "No menu" };
 
-            const now = new Date();
-            const currentMinutes = now.getHours() * 60 + now.getMinutes();
+            const currentMinutes = getISTMinutes();
             const mealStart = parseTimeToMinutes(meal.start_time);
 
-            if (currentMinutes < mealStart) {
+            // Allow 2-minute clock drift grace period
+            if (currentMinutes + 2 < mealStart) {
                 return {
                     isOpen: false,
                     reason: `Opens at ${meal.start_time}`,
