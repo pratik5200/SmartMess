@@ -155,7 +155,8 @@ You MUST return STRICT JSON using this EXACT structure (24 objects total: 7 regu
         const ext = file.originalname.split('.').pop();
         const fileName = `${bhawanId}-${fieldName}-${Date.now()}.${ext}`;
         fs.writeFileSync(path.join(UPLOADS_DIR, fileName), file.buffer);
-        return `http://localhost:5000/uploads/${fileName}`;
+        const baseUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+        return `${baseUrl}/uploads/${fileName}`;
       }
       return null;
     };
@@ -339,7 +340,8 @@ router.post("/rate/:menuId", ratingUpload, async (req, res) => {
             const fileName = `feedback-${menuId}-${Date.now()}.${ext}`;
             const uploadPath = path.join(__dirname, "../../uploads", fileName);
             fs.writeFileSync(uploadPath, req.file.buffer);
-            imageUrl = `http://localhost:5000/uploads/${fileName}`;
+            const baseUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+            imageUrl = `${baseUrl}/uploads/${fileName}`;
         }
 
         if (studentId) {
@@ -489,7 +491,8 @@ router.get("/latest-image/:bhawanId", (req, res) => {
         const match = files.find(f => f.startsWith(`menu-${req.params.bhawanId}-latest.`));
         
         if (match) {
-            res.json({ url: `http://localhost:5000/uploads/${match}` });
+            const baseUrl = process.env.BACKEND_URL || `${req.protocol}://${req.get('host')}`;
+            res.json({ url: `${baseUrl}/uploads/${match}` });
         } else {
             res.json({ url: null });
         }
