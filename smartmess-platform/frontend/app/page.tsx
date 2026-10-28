@@ -31,7 +31,7 @@ const services = [
     title: "View Your Menu",
     label: "One Click",
     action: "View",
-    href: "/student-dashboard.html?tab=menu",
+    href: "/index.html?tab=menu",
     alt: "View Menu",
     img: "/menu-img.png",
   },
@@ -39,7 +39,7 @@ const services = [
     title: "Give Feedbacks",
     label: "Rate Meal",
     action: "Rate",
-    href: "/student-dashboard.html?tab=menu&rate=current",
+    href: "/index.html?tab=menu&rate=current",
     alt: "Give Feedback",
     img: "/feedback-img.png",
   },
@@ -114,7 +114,7 @@ function useTodaysMeals() {
         const bhawanId = user?.bhawanId || (user?.bhawan && user?.bhawan?.id);
         if (!bhawanId) return;
 
-        const res = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/today/${bhawanId}`);
+        const res = await fetch(`http://localhost:5000/api/menus/today/${bhawanId}`);
         if (!res.ok) return;
         const data: Array<{
           meal_type: string;
@@ -203,7 +203,7 @@ const reviews = [
 
 const quickLinks = [
   { label: "Service", href: "#services" },
-  { label: "Today's Menu", href: "/student-dashboard.html?tab=menu" },
+  { label: "Today's Menu", href: "/index.html?tab=menu" },
   { label: "How It Works", href: "#how" },
   { label: "Feedback", href: "#feedback" },
 ];
@@ -357,14 +357,14 @@ export default function SmartMessHome() {
             <div className="flex gap-4 sm:gap-6 w-full justify-center items-center overflow-x-auto py-2 order-3 border-t border-black/5 mt-2 md:mt-0 md:border-t-0 md:absolute md:left-1/2 md:-translate-x-1/2 md:w-auto md:order-none md:py-0 md:gap-[35px] md:overflow-visible [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
               <RollingLink
                 plain
-                href="/student-dashboard.html?tab=menu"
+                href="/index.html?tab=menu"
                 className="font-serif text-[#3D3126] text-[13px] sm:text-[14px] md:text-base font-medium whitespace-nowrap cursor-pointer"
               >
                 Menu
               </RollingLink>
               <RollingLink
                 plain
-                href="/student-dashboard.html?tab=profile"
+                href="/index.html?tab=profile"
                 className="font-serif text-[#3D3126] text-[13px] sm:text-[14px] md:text-base font-medium whitespace-nowrap"
               >
                 Profile
@@ -439,7 +439,7 @@ export default function SmartMessHome() {
 
             <div className="flex flex-wrap sm:flex-nowrap gap-3 sm:gap-[15px] pt-1">
               <a
-                href={currentUser?.role === "STAFF" ? "/staff-dashboard.html" : "/student-dashboard.html?tab=menu"}
+                href={currentUser?.role === "STAFF" ? "/staff-dashboard.html" : "/index.html?tab=menu"}
                 className="bg-[#BA6017] text-white font-sans px-5 sm:px-7 py-2.5 rounded-full font-semibold text-[13px] sm:text-[15px] transition-all hover:bg-[#9C4F12] hover:-translate-y-0.5 inline-block text-center cursor-pointer no-underline shadow-sm flex-1 sm:flex-none whitespace-nowrap"
               >
                 View Today's Menu
@@ -447,7 +447,7 @@ export default function SmartMessHome() {
 
               {currentUser ? (
                 <a
-                  href={currentUser.role === "STAFF" ? "/staff-dashboard.html" : "/student-dashboard.html"}
+                  href={currentUser.role === "STAFF" ? "/staff-dashboard.html" : "/index.html"}
                   className="bg-transparent text-[#3D3126] border-2 border-[#3D3126] font-sans px-5 sm:px-7 py-2.5 rounded-full font-semibold text-[13px] sm:text-[15px] transition-all hover:bg-[#3D3126] hover:text-[#FCF5E3] inline-block text-center flex-1 sm:flex-none whitespace-nowrap no-underline"
                 >
                   {currentUser.role === "STAFF" ? "Staff Dashboard" : "My Dashboard"}
@@ -494,7 +494,7 @@ export default function SmartMessHome() {
                     } else if (currentMinutes >= 17 * 60) {
                       currentMeal = "Dinner";
                     }
-                    window.location.href = `/student-dashboard.html?tab=menu&rate=${currentMeal}`;
+                    window.location.href = `/index.html?tab=menu&rate=${currentMeal}`;
                     return;
                   }
                   if (s.href.startsWith("#")) {
