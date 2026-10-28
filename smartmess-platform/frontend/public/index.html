@@ -1351,7 +1351,7 @@
         } else {
             // Auto-fetch profile or bhawans if bhawan name is missing from older session
             if (loggedInUser.id) {
-                fetch(`http://localhost:5000/api/auth/profile/${loggedInUser.id}`)
+                fetch(`https://smartmess-0hqf.onrender.com/api/auth/profile/${loggedInUser.id}`)
                     .then(res => res.json())
                     .then(userData => {
                         const fetchedName = userData.bhawanName || (userData.bhawan && userData.bhawan.name);
@@ -1361,7 +1361,7 @@
                             if (userData.bhawan) loggedInUser.bhawan = userData.bhawan;
                             localStorage.setItem('smartmess_user', JSON.stringify(loggedInUser));
                         } else if (loggedInUser.bhawanId) {
-                            fetch('http://localhost:5000/api/bhawans')
+                            fetch('https://smartmess-0hqf.onrender.com/api/bhawans')
                                 .then(r => r.json())
                                 .then(bhawans => {
                                     const match = bhawans.find(b => b.id === loggedInUser.bhawanId);
@@ -1433,7 +1433,7 @@
 
         async function fetchTodaysMenu() {
             try {
-                const response = await fetch(`http://localhost:5000/api/menus/today/${BHAWAN_ID}`);
+                const response = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/today/${BHAWAN_ID}`);
                 const menus = await response.json();
 
                 if (!Array.isArray(menus) || menus.length === 0) {
@@ -1660,7 +1660,7 @@
             const promises = Object.entries(modalItemRatings)
                 .filter(([, val]) => val > 0)
                 .map(([itemName, val]) =>
-                    fetch('http://localhost:5000/api/feedback/daily', {
+                    fetch('https://smartmess-0hqf.onrender.com/api/feedback/daily', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -1749,7 +1749,7 @@
 
         async function fetchFullWeekMenu() {
             try {
-                const response = await fetch(`http://localhost:5000/api/menus/week/${BHAWAN_ID}`);
+                const response = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/week/${BHAWAN_ID}`);
                 const allMenus = await response.json();
 
                 if (!Array.isArray(allMenus) || allMenus.length === 0) {
@@ -1954,7 +1954,7 @@
             if (photoInput.files[0]) formData.append('foodPhoto', photoInput.files[0]);
 
             try {
-                const response = await fetch(`http://localhost:5000/api/menus/rate/${menuId}`, {
+                const response = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/rate/${menuId}`, {
                     method: 'POST',
                     body: formData
                 });
@@ -1977,7 +1977,7 @@
             const container = document.getElementById('tab-feedback');
             container.innerHTML = '<h2 style="font-family: \'Fraunces\', serif; color: var(--secondary-green);">My Feedback History</h2><p>Loading your reviews...</p>';
             try {
-                const response = await fetch(`http://localhost:5000/api/menus/feedback/student/${loggedInUser.id}`);
+                const response = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/feedback/student/${loggedInUser.id}`);
                 const history = await response.json();
 
                 if (history.length === 0) return container.innerHTML = '<h2 style="font-family: \'Fraunces\', serif; color: var(--secondary-green);">My Feedback History</h2><p style="color: var(--text-taupe);">You have not submitted any meal ratings yet.</p>';
@@ -2007,7 +2007,7 @@
 
         async function loadUserProfile() {
             try {
-                const res = await fetch(`http://localhost:5000/api/auth/profile/${loggedInUser.id}`);
+                const res = await fetch(`https://smartmess-0hqf.onrender.com/api/auth/profile/${loggedInUser.id}`);
                 const user = await res.json();
 
                 const currentBhawanName = user.bhawanName || (user.bhawan && user.bhawan.name);
@@ -2109,7 +2109,7 @@
             };
 
             try {
-                const res = await fetch(`http://localhost:5000/api/auth/profile/${loggedInUser.id}`, {
+                const res = await fetch(`https://smartmess-0hqf.onrender.com/api/auth/profile/${loggedInUser.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(updateData)
@@ -2135,7 +2135,7 @@
         // --- 6. TICKETING SYSTEM LOGIC (NON-VEG COUPONS ONLY) ---
         async function selectMealOption(menuId) {
             try {
-                const res = await fetch("http://localhost:5000/api/menus/selection", {
+                const res = await fetch("https://smartmess-0hqf.onrender.com/api/menus/selection", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ studentId: loggedInUser.id, menuId, choice: 'NON-VEG' })
@@ -2150,7 +2150,7 @@
         async function loadUserTickets() {
             const container = document.getElementById('ticketContainer');
             try {
-                const res = await fetch(`http://localhost:5000/api/menus/tickets/${loggedInUser.id}`);
+                const res = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/tickets/${loggedInUser.id}`);
                 const tickets = await res.json();
 
                 let html = '';
@@ -2196,7 +2196,7 @@
         // --- 7. SETTINGS (BHAWAN TRANSFER) LOGIC ---
         async function loadSettings() {
             try {
-                const response = await fetch("http://localhost:5000/api/auth/bhawans");
+                const response = await fetch("https://smartmess-0hqf.onrender.com/api/auth/bhawans");
                 const bhawans = await response.json();
 
                 const select = document.getElementById('settingsBhawanSelect');
@@ -2223,7 +2223,7 @@
             if (!confirm("Are you sure you want to switch hostels? This will delete any upcoming meal tickets you reserved at your old hostel.")) return;
 
             try {
-                const res = await fetch(`http://localhost:5000/api/auth/profile/${loggedInUser.id}`, {
+                const res = await fetch(`https://smartmess-0hqf.onrender.com/api/auth/profile/${loggedInUser.id}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ bhawanId: newBhawanId })
@@ -2292,7 +2292,7 @@
                 if (currentUser.id) params.set('id', currentUser.id);
                 if (currentUser.email) params.set('email', currentUser.email);
 
-                const url = 'http://localhost:5000/api/auth/user-info' + (params.toString() ? '?' + params.toString() : '');
+                const url = 'https://smartmess-0hqf.onrender.com/api/auth/user-info' + (params.toString() ? '?' + params.toString() : '');
                 const res = await fetch(url);
                 if (res.ok) {
                     const dbUser = await res.json();
@@ -2377,7 +2377,7 @@
             };
 
             try {
-                const res = await fetch('http://localhost:5000/api/contact', {
+                const res = await fetch('https://smartmess-0hqf.onrender.com/api/contact', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
