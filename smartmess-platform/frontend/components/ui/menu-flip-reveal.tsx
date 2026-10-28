@@ -94,7 +94,7 @@ function MealCard({ meal, compact = false }: { meal: Meal; compact?: boolean }) 
                     {meal.rating !== "—" ? `★ ${meal.rating} / 5` : "No ratings yet"}
                 </span>
                 <a
-                    href={`/index.html?tab=menu&rate=${encodeURIComponent(meal.name)}`}
+                    href={`/student-dashboard.html?tab=menu&rate=${encodeURIComponent(meal.name)}`}
                     className={selectBtn}
                 >
                     Rate
