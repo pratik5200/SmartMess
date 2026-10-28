@@ -918,7 +918,7 @@
         </div>
 
         <nav class="nav-links">
-            <a href="index.html"><i class="ri-graduation-cap-line"></i> Student View</a>
+            <a href="student-dashboard.html"><i class="ri-graduation-cap-line"></i> Student View</a>
             <a href="#" class="active" onclick="switchStaffTab('upload', event)"><i class="ri-upload-cloud-2-line"></i>
                 Upload Menu</a>
             <a href="#" onclick="switchStaffTab('alerts', event)"><i class="ri-feedback-line"></i> Feedback
@@ -972,7 +972,7 @@
             </nav>
 
             <div class="topbar-right">
-                <a href="index.html" class="topbar-icon-btn student-btn" data-tooltip="Student View"
+                <a href="student-dashboard.html" class="topbar-icon-btn student-btn" data-tooltip="Student View"
                     title="Student View" aria-label="Student View">
                     <i class="ri-graduation-cap-line"></i>
                 </a>
@@ -1227,7 +1227,7 @@
         const BHAWAN_ID = loggedInUser ? (loggedInUser.bhawanId || (loggedInUser.bhawan && loggedInUser.bhawan.id)) : null;
         if (!loggedInUser || loggedInUser.role === 'STUDENT') {
             alert("Unauthorized. Staff access only.");
-            window.location.href = 'index.html';
+            window.location.href = 'student-dashboard.html';
         }
 
         function updateSidebarBhawanDisplay(name) {

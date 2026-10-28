@@ -107,7 +107,7 @@ smartmess/
         │   └── ui/
         │       └── contact-dialog.tsx  # Hostel administration contact modal
         └── public/                     # Static assets, SVG logos & client portals
-            ├── index.html              # Interactive Student Portal
+            ├── student-dashboard.html  # Interactive Student Portal
             ├── staff-dashboard.html    # Staff Administration & Analytics Portal
             ├── login.html              # Authentication portal
             ├── register.html           # Account registration portal
@@ -238,7 +238,7 @@ cd smartmess-platform/frontend
 npm run dev
 ```
 - **Frontend App URL**: [http://localhost:3000](http://localhost:3000)
-- **Student Dashboard**: [http://localhost:3000/index.html](http://localhost:3000/index.html)
+- **Student Dashboard**: [http://localhost:3000/student-dashboard.html](http://localhost:3000/student-dashboard.html)
 - **Staff Admin Dashboard**: [http://localhost:3000/staff-dashboard.html](http://localhost:3000/staff-dashboard.html)
 
 ---
