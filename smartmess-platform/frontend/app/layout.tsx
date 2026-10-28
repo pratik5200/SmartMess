@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Manrope, Fraunces } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 
 const manrope = Manrope({
@@ -56,6 +57,7 @@ export default function RootLayout({
       </head>
       <body className="min-h-screen bg-cream text-espresso font-sans w-full max-w-full overflow-x-clip" suppressHydrationWarning>
         {children}
+        <Analytics />
       </body>
     </html>
   );
