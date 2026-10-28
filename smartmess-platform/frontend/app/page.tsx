@@ -114,7 +114,7 @@ function useTodaysMeals() {
         const bhawanId = user?.bhawanId || (user?.bhawan && user?.bhawan?.id);
         if (!bhawanId) return;
 
-        const res = await fetch(`http://localhost:5000/api/menus/today/${bhawanId}`);
+        const res = await fetch(`https://smartmess-0hqf.onrender.com/api/menus/today/${bhawanId}`);
         if (!res.ok) return;
         const data: Array<{
           meal_type: string;
