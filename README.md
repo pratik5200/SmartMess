@@ -15,12 +15,10 @@
 
 - [Features](#-features)
 - [Tech Stack Overview](#-tech-stack-overview)
-- [Folder Structure](#-folder-structure)
 - [Environment Variables Setup](#-environment-variables-setup)
 - [Database Setup & Seeding](#-database-setup--seeding)
 - [Running Development Servers](#-running-development-servers)
 - [API Endpoints Overview](#-api-endpoints-overview)
-- [Troubleshooting & FAQ](#-troubleshooting--faq)
 
 ---
 
@@ -60,57 +58,6 @@
 ### Database & ORM
 - **Database**: [PostgreSQL](https://www.postgresql.org/) (Compatible with [Neon Serverless Postgres](https://neon.tech/) with SSL connection pooling)
 - **ORM**: [Prisma](https://www.prisma.io/) (v7 with `@prisma/adapter-pg` and `@prisma/client`)
-
----
-
-## 📂 Folder Structure
-
-The repository is structured as a full-stack monorepo with distinct frontend and backend directories:
-
-```text
-smartmess/
-├── README.md                           # Main project documentation
-└── smartmess-platform/
-    ├── backend/                        # Node.js Express REST API
-    │   ├── package.json
-    │   ├── .env                        # Secure environment variables (git-ignored)
-    │   ├── .gitignore                  # Backend-specific ignore rules
-    │   ├── seed-bhawans.js             # Initial database seed script
-    │   ├── uploads/                    # Local upload directory for menu & feedback photos
-    │   ├── prisma/
-    │   │   ├── schema.prisma           # Prisma data models and relations
-    │   │   └── migrations/             # Database migration history
-    │   └── src/
-    │       ├── index.js                # Express app entrypoint & middleware configuration
-    │       ├── db.js                   # Prisma & PostgreSQL client pool connection
-    │       └── routes/
-    │           ├── auth.routes.js      # Student & staff registration, login & Google OAuth
-    │           ├── bhawan.routes.js    # Hostel Bhawan listings and metadata
-    │           ├── menu.routes.js      # Menu creation, Gemini AI OCR parsing & meal timing
-    │           ├── feedback.routes.js  # Ratings, dish-level reviews & critical alerts
-    │           └── contact.routes.js   # Contact form & student grievance reporting
-    │
-    └── frontend/                       # Next.js TypeScript Web Application
-        ├── package.json
-        ├── .env.local                  # Frontend environment variables (git-ignored)
-        ├── .gitignore                  # Frontend-specific ignore rules
-        ├── tsconfig.json
-        ├── next.config.ts
-        ├── app/                        # Next.js App Router pages & layouts
-        │   ├── layout.tsx
-        │   ├── page.tsx                # Landing & live student dashboard
-        │   └── globals.css             # Design system styling & theme variables
-        ├── components/                 # Reusable UI components & dialogs
-        │   └── ui/
-        │       └── contact-dialog.tsx  # Hostel administration contact modal
-        └── public/                     # Static assets, SVG logos & client portals
-            ├── index.html              # Interactive Student Portal
-            ├── staff-dashboard.html    # Staff Administration & Analytics Portal
-            ├── login.html              # Authentication portal
-            ├── register.html           # Account registration portal
-            └── smartmess_logo_vector.svg
-```
-
 
 ---
 
@@ -217,25 +164,6 @@ The backend exposes RESTful endpoints under `/api`:
 | `POST` | `/api/feedback/rate` | Submit meal ratings and photos |
 | `GET` | `/api/feedback/dietary-counts` | Get coupon counts for upcoming special meals |
 | `POST` | `/api/contact` | Submit contact grievance or feedback |
-
----
-
-## 🛠️ Troubleshooting & FAQ
-
-<details>
-<summary><b>1. Cross-Origin Resource Sharing (CORS) Errors</b></summary>
-Ensure the backend `src/index.js` includes <code>http://localhost:3000</code> in its <code>allowedOrigins</code> list. If you run the frontend on a different port, update the array accordingly.
-</details>
-
-<details>
-<summary><b>2. PostgreSQL / Neon SSL Connection Issues</b></summary>
-If you see an SSL certificate or connection timeout error, ensure your <code>DATABASE_URL</code> string includes <code>?sslmode=require</code> and that your database permits incoming connections from your IP.
-</details>
-
-<details>
-<summary><b>3. Prisma Schema Out of Sync</b></summary>
-If you modify <code>prisma/schema.prisma</code>, always re-run <code>npx prisma generate</code> followed by <code>npx prisma db push</code>.
-</details>
 
 ---
 
