@@ -450,12 +450,6 @@
                         <i class="ri-arrow-down-s-line select-arrow"></i>
                     </div>
 
-                    <!-- Optional Staff Passcode field (if staff) -->
-                    <div class="input-group" id="staffPasscodeGroup" style="display: none;">
-                        <i class="ri-shield-keyhole-line input-icon"></i>
-                        <input type="password" id="staffPasscode" placeholder="Staff Authorization Code (optional)">
-                    </div>
-
                     <!-- Submit Button -->
                     <button type="submit" id="submitBtn" class="btn-login">Create account</button>
 
@@ -545,22 +539,31 @@
                 return; 
             }
 
+            const identifierVal = document.getElementById('identifier').value.trim();
+
+            // Strict validation: student emails MUST end with .iitr.ac.in
+            if (identifierVal.includes("@")) {
+                const parts = identifierVal.toLowerCase().split("@");
+                const domain = parts.length === 2 ? parts[1] : "";
+                if (domain !== "iitr.ac.in" && !domain.endsWith(".iitr.ac.in")) {
+                    errorText.innerText = "Please use your valid institute email ID ending with .iitr.ac.in (e.g., student@iitr.ac.in or student@branch.iitr.ac.in).";
+                    errorText.style.display = 'block';
+                    return;
+                }
+            }
+
             const btn = document.getElementById('submitBtn');
             const originalBtnText = btn.innerText;
             btn.innerText = "Creating account...";
             btn.disabled = true;
 
             const fullNameVal = document.getElementById('fullName') ? document.getElementById('fullName').value.trim() : "";
-            const passcodeVal = document.getElementById('staffPasscode') ? document.getElementById('staffPasscode').value : "";
-            const userRoleVal = passcodeVal ? "STAFF" : "STUDENT";
 
             const payload = {
-                role: userRoleVal,
                 name: fullNameVal,
-                identifier: document.getElementById('identifier').value,
+                identifier: identifierVal,
                 password: password,
                 bhawanName: selectedBhawan,
-                staffPasscode: passcodeVal,
                 isSignUp: true
             };
 
