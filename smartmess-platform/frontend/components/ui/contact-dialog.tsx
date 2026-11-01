@@ -62,7 +62,7 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
         if (cachedUser?.id) params.set("id", cachedUser.id);
         if (cachedUser?.email) params.set("email", cachedUser.email);
 
-        const url = `http://localhost:5000/api/auth/user-info${params.toString() ? `?${params.toString()}` : ""}`;
+        const url = `https://smartmess-0hqf.onrender.com/api/auth/user-info${params.toString() ? `?${params.toString()}` : ""}`;
         const res = await fetch(url);
         if (res.ok && isMounted) {
           const dbUser = await res.json();
@@ -139,7 +139,7 @@ export function ContactDialog({ isOpen, onClose }: ContactDialogProps) {
 
     try {
       // Submit directly to Backend API (which saves locally and syncs to Google Sheet)
-      const res = await fetch("http://localhost:5000/api/contact", {
+      const res = await fetch("https://smartmess-0hqf.onrender.com/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

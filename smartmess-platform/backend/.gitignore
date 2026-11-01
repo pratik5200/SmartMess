@@ -32,6 +32,15 @@ uploads/
 .DS_Store
 Thumbs.db
 *.pem
+*.key
+*.cert
+*.crt
+*.pfx
+*.p12
+*.sql
+*.dump
+*.sqlite
+*.sqlite3
 
 # ==========================================
 # AI IDE & Workspace Folders

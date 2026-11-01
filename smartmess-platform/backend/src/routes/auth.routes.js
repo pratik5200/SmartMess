@@ -7,8 +7,28 @@ const bcrypt = require('bcrypt');
 const GOOGLE_CLIENT_ID = "548846928986-jateo4qrmv4mc4k6t6746cdedj9bqd77.apps.googleusercontent.com"; 
 const client = new OAuth2Client(GOOGLE_CLIENT_ID);
 
+// Validates official IIT Roorkee student email addresses:
+// Accepts @iitr.ac.in and all branch/subdomain variants (e.g. @es.iitr.ac.in, @cs.iitr.ac.in)
+function isValidIITREmail(email) {
+    if (!email || typeof email !== 'string') return false;
+    const trimmed = email.trim().toLowerCase();
+    const parts = trimmed.split('@');
+    if (parts.length !== 2) return false;
+    const domain = parts[1];
+    return domain === 'iitr.ac.in' || domain.endsWith('.iitr.ac.in');
+}
+
 router.post('/login', async (req, res) => {
-    const { identifier, password, role, bhawanName, staffPasscode, isSignUp, name } = req.body;
+    const { identifier, password, bhawanName, isSignUp, name } = req.body;
+    const trimmedId = (identifier || '').trim();
+    const isEmail = trimmedId.includes('@');
+
+    // Strict validation for new account creation: email MUST end with .iitr.ac.in
+    if (isSignUp && isEmail && !isValidIITREmail(trimmedId)) {
+        return res.status(403).json({
+            error: "Please use your valid IIT Roorkee institute email ID ending with .iitr.ac.in (e.g., student@iitr.ac.in or student@branch.iitr.ac.in)."
+        });
+    }
 
     try {
         let user = await prisma.user.findFirst({
@@ -28,6 +48,13 @@ router.post('/login', async (req, res) => {
         }
         // EXISTING USER: Handle Login
         if (user && !isSignUp) {
+            // Block any student account previously registered with a non-IITR email
+            if (user.role === "STUDENT" && user.email && !isValidIITREmail(user.email)) {
+                return res.status(403).json({
+                    error: "Access denied. Only official IIT Roorkee email IDs (*.iitr.ac.in) are authorized for student accounts."
+                });
+            }
+
             const isPasswordValid = await bcrypt.compare(password, user.password);
             if (!isPasswordValid) return res.status(401).json({ error: "Incorrect password." });
             
@@ -49,11 +76,6 @@ router.post('/login', async (req, res) => {
         
         // NEW USER: Handle Registration
         if (!user && isSignUp) {
-            // SECURITY CHECK: Verify Staff Passcode
-            if (role === "STAFF" && staffPasscode !== "ADMIN123") {
-                return res.status(403).json({ error: "Invalid staff authorization code." });
-            }
-
             if (!bhawanName) return res.status(400).json({ error: "Please select a Bhawan for new registration." });
 
             let userBhawan = await prisma.bhawan.findFirst({ where: { name: bhawanName } });
@@ -62,10 +84,6 @@ router.post('/login', async (req, res) => {
             const isEmail = identifier.includes("@");
             const saltRounds = 10;
             const hashedPassword = await bcrypt.hash(password, saltRounds);
-            let dbRole = "STUDENT";
-            if (role === "STAFF") {
-                dbRole = "ADMIN"; 
-            }
 
             user = await prisma.user.create({
                 data: {
@@ -74,7 +92,7 @@ router.post('/login', async (req, res) => {
                     roll_no: isEmail ? null : identifier,
                     password: hashedPassword,
                     bhawanId: userBhawan.id,
-                    role: dbRole
+                    role: "STUDENT"
                 },
                 include: { bhawan: true }
             });
@@ -100,7 +118,7 @@ router.post("/google", async (req, res) => {
     const email = payload.email;
     const name = payload.name;
 
-    if (!email.endsWith("iitr.ac.in")) return res.status(403).json({ error: "Please use your valid institute email ID (@iitr.ac.in)." });
+    if (!isValidIITREmail(email)) return res.status(403).json({ error: "Please use your valid institute email ID ending with .iitr.ac.in (e.g. @iitr.ac.in or @branch.iitr.ac.in)." });
 
     let user = await prisma.user.findUnique({ where: { email: email }, include: { bhawan: true } });
 
@@ -229,7 +247,12 @@ router.put("/profile/:id", async (req, res) => {
         
         const updateData = { name };
         if (profilePic !== undefined) updateData.profilePic = profilePic;
-        if (!currentUser.email && email) updateData.email = email;
+        if (!currentUser.email && email) {
+            if (currentUser.role === "STUDENT" && !isValidIITREmail(email)) {
+                return res.status(403).json({ error: "Only official IIT Roorkee email IDs (*.iitr.ac.in) are allowed." });
+            }
+            updateData.email = email;
+        }
         if (!currentUser.roll_no && roll_no) updateData.roll_no = roll_no;
 
         // ADVANCED LOGIC: If the user changes their Bhawan
