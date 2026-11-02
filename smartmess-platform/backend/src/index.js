@@ -39,12 +39,14 @@ const bhawanRoutes = require("./routes/bhawan.routes");
 const menuRoutes = require("./routes/menu.routes");
 const feedbackRoutes = require("./routes/feedback.routes");
 const contactRoutes = require("./routes/contact.routes");
+const otpRoutes = require("./routes/otp.routes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/bhawans", bhawanRoutes);
 app.use("/api/menus", menuRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/otp", otpRoutes);
 
 app.get("/", (req, res) => {
   res.json({

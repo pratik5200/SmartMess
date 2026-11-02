@@ -366,6 +366,98 @@
             animation: fadeIn 0.2s ease-in-out;
         }
 
+        /* ── OTP Verification Panel ── */
+        .otp-panel {
+            display: none;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .otp-badge {
+            width: 56px;
+            height: 56px;
+            background: #EEF3EC;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .otp-badge i {
+            font-size: 1.6rem;
+            color: #5F7751;
+        }
+
+        .otp-inputs {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 24px 0;
+        }
+
+        .otp-digit {
+            width: 52px;
+            height: 60px;
+            border: 1.5px solid var(--border-color);
+            border-radius: 12px;
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 700;
+            font-family: 'DM Sans', monospace;
+            color: var(--text-dark);
+            background: #FFFFFF;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            outline: none;
+            caret-color: var(--primary-green);
+        }
+
+        .otp-digit:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3.5px rgba(95, 119, 81, 0.15);
+        }
+
+        .otp-resend-row {
+            text-align: center;
+            margin-top: 4px;
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+
+        .otp-resend-btn {
+            background: none;
+            border: none;
+            color: var(--primary-green);
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.88rem;
+            cursor: pointer;
+            padding: 0;
+            margin-left: 4px;
+            transition: color 0.2s;
+        }
+
+        .otp-resend-btn:hover { color: var(--primary-green-hover); text-decoration: underline; }
+        .otp-resend-btn:disabled { color: #9CA3AF; cursor: not-allowed; text-decoration: none; }
+
+        .otp-back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 0.88rem;
+            font-weight: 500;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-family: 'DM Sans', sans-serif;
+            margin-bottom: 24px;
+            padding: 0;
+            transition: color 0.2s;
+        }
+        .otp-back-link:hover { color: var(--text-dark); }
+
+
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -505,6 +597,35 @@
                 <!-- Error Alert Message -->
                 <p id="errorText" class="error-msg"></p>
 
+                <!-- ── OTP VERIFICATION PANEL (hidden by default) ── -->
+                <div id="otpPanel" class="otp-panel">
+                    <button type="button" class="otp-back-link" id="otpBackBtn">
+                        <i class="ri-arrow-left-line"></i> Back
+                    </button>
+                    <div class="otp-badge"><i class="ri-mail-check-line"></i></div>
+                    <h2 style="font-size:1.5rem;font-weight:800;color:var(--text-dark);margin:0 0 8px 0;">Check your email</h2>
+                    <p id="otpSubtitle" style="color:var(--text-muted);font-size:0.95rem;margin:0 0 4px 0;">We sent a 6-digit code to</p>
+                    <p id="otpEmailDisplay" style="color:var(--text-dark);font-weight:700;font-size:0.95rem;margin:0;"></p>
+
+                    <div class="otp-inputs" id="otpInputs">
+                        <input class="otp-digit" id="otp0" type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code">
+                        <input class="otp-digit" id="otp1" type="text" inputmode="numeric" maxlength="1">
+                        <input class="otp-digit" id="otp2" type="text" inputmode="numeric" maxlength="1">
+                        <input class="otp-digit" id="otp3" type="text" inputmode="numeric" maxlength="1">
+                        <input class="otp-digit" id="otp4" type="text" inputmode="numeric" maxlength="1">
+                        <input class="otp-digit" id="otp5" type="text" inputmode="numeric" maxlength="1">
+                    </div>
+
+                    <p id="otpErrorText" style="color:#D9381E;font-size:0.88rem;text-align:center;min-height:20px;margin:0 0 12px 0;"></p>
+
+                    <button type="button" id="verifyOtpBtn" class="btn-login">Verify &amp; Create Account</button>
+
+                    <div class="otp-resend-row">
+                        Didn't receive it?
+                        <button type="button" class="otp-resend-btn" id="resendOtpBtn">Resend code</button>
+                    </div>
+                </div>
+
                 <!-- Terms and Privacy Policy -->
                 <p class="terms-text" id="termsText">
                     By continuing, you agree to our <a href="#"
@@ -520,6 +641,7 @@
     <script>
         const LOGIN_IMG = "/smartmess_hero.png";
         const SIGNUP_IMG = "/smartmess_signup_hero.png";
+        const API_BASE_URL = "https://smartmess-0hqf.onrender.com";
 
         // Check existing session
         const existingUser = JSON.parse(localStorage.getItem('smartmess_user'));
@@ -529,6 +651,9 @@
 
         const errorText = document.getElementById('errorText');
         let isSignUpMode = false; // Tracks if the user is registering
+
+        // ── Pending registration data (held between OTP steps) ──
+        let pendingRegistration = null;
 
         // Password Visibility Toggles
         const passwordInput = document.getElementById('password');
@@ -567,7 +692,137 @@
             window.location.replace('/');
         }
 
-        // Toggles the UI between Login and Registration (exactly matching Image 1 for both)
+        // ── OTP Panel helpers ──────────────────────────────────────
+        function showOtpPanel(email) {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('errorText').style.display = 'none';
+            const panel = document.getElementById('otpPanel');
+            panel.style.display = 'flex';
+            document.getElementById('otpEmailDisplay').innerText = email;
+            document.getElementById('otp0').focus();
+        }
+
+        function hideOtpPanel() {
+            document.getElementById('otpPanel').style.display = 'none';
+            document.getElementById('loginForm').style.display = '';
+            // Clear OTP digits
+            for (let i = 0; i < 6; i++) {
+                const el = document.getElementById('otp' + i);
+                if (el) el.value = '';
+            }
+            document.getElementById('otpErrorText').innerText = '';
+        }
+
+        function getEnteredOTP() {
+            return Array.from({ length: 6 }, (_, i) => {
+                const el = document.getElementById('otp' + i);
+                return el ? el.value : '';
+            }).join('');
+        }
+
+        // Auto-advance OTP digit boxes
+        document.querySelectorAll('.otp-digit').forEach((input, idx, all) => {
+            input.addEventListener('input', (e) => {
+                // Accept only digits
+                input.value = input.value.replace(/[^0-9]/g, '').slice(-1);
+                if (input.value && idx < all.length - 1) all[idx + 1].focus();
+            });
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !input.value && idx > 0) all[idx - 1].focus();
+            });
+            input.addEventListener('paste', (e) => {
+                e.preventDefault();
+                const pasted = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g, '');
+                pasted.split('').slice(0, 6).forEach((ch, i) => {
+                    if (all[i]) all[i].value = ch;
+                });
+                const nextEmpty = [...all].findIndex(el => !el.value);
+                if (nextEmpty !== -1) all[nextEmpty].focus(); else all[5].focus();
+            });
+        });
+
+        // Back button from OTP panel
+        document.getElementById('otpBackBtn').addEventListener('click', () => {
+            pendingRegistration = null;
+            hideOtpPanel();
+        });
+
+        // Resend OTP button
+        let resendCooldown = 0;
+        document.getElementById('resendOtpBtn').addEventListener('click', async function () {
+            if (!pendingRegistration) return;
+            this.disabled = true;
+            document.getElementById('otpErrorText').innerText = '';
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/otp/resend-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: pendingRegistration.email })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    document.getElementById('otpErrorText').style.color = '#5F7751';
+                    document.getElementById('otpErrorText').innerText = 'New code sent! Check your inbox.';
+                    setTimeout(() => { document.getElementById('otpErrorText').innerText = ''; document.getElementById('otpErrorText').style.color = '#D9381E'; }, 4000);
+                } else {
+                    document.getElementById('otpErrorText').innerText = data.error || 'Failed to resend code.';
+                }
+            } catch { document.getElementById('otpErrorText').innerText = 'Network error. Please try again.'; }
+            // 30s cooldown
+            let seconds = 30;
+            const interval = setInterval(() => {
+                seconds--;
+                this.innerText = `Resend code (${seconds}s)`;
+                if (seconds <= 0) { clearInterval(interval); this.disabled = false; this.innerText = 'Resend code'; }
+            }, 1000);
+        });
+
+        // Verify OTP button
+        document.getElementById('verifyOtpBtn').addEventListener('click', async function () {
+            const otp = getEnteredOTP();
+            const otpErrEl = document.getElementById('otpErrorText');
+            otpErrEl.style.color = '#D9381E';
+            otpErrEl.innerText = '';
+
+            if (otp.length < 6) {
+                otpErrEl.innerText = 'Please enter the full 6-digit code.';
+                return;
+            }
+            if (!pendingRegistration) { hideOtpPanel(); return; }
+
+            this.innerText = 'Verifying...';
+            this.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/otp/verify-and-register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: pendingRegistration.email,
+                        otp: otp,
+                        name: pendingRegistration.name,
+                        identifier: pendingRegistration.identifier,
+                        password: pendingRegistration.password,
+                        bhawanName: pendingRegistration.bhawanName,
+                    })
+                });
+                const data = await res.json();
+                if (res.ok) {
+                    completeLogin(data.user);
+                } else {
+                    otpErrEl.innerText = data.error || 'Verification failed. Please try again.';
+                    this.innerText = 'Verify & Create Account';
+                    this.disabled = false;
+                }
+            } catch {
+                otpErrEl.innerText = 'Network error. Please try again.';
+                this.innerText = 'Verify & Create Account';
+                this.disabled = false;
+            }
+        });
+        // ─────────────────────────────────────────────────────────
+
+        // Toggles the UI between Login and Registration
         function toggleMode(event) {
             if (event) event.preventDefault();
             isSignUpMode = !isSignUpMode;
@@ -589,7 +844,6 @@
             errorText.style.display = 'none';
 
             if (isSignUpMode) {
-                // Switch hero image to Sign Up mockup
                 heroImage.style.opacity = '0.4';
                 setTimeout(() => {
                     heroImage.src = SIGNUP_IMG;
@@ -597,11 +851,9 @@
                     heroImage.style.opacity = '1';
                 }, 120);
 
-                // Sign Up Headers & Texts matching Image 1
                 authTitle.innerText = "Create your account";
                 authSubtitle.innerText = "Join SmartMess and make your mess experience easier.";
 
-                // Show Sign Up inputs in the exact layout order
                 fullNameGroup.style.display = 'flex';
                 nameInput.required = true;
 
@@ -617,7 +869,6 @@
 
                 termsText.innerHTML = 'By creating an account, you agree to our <a href="#" onclick="alert(\'SmartMess Terms of Service: Designed for IITR Mess Dining Facilities.\'); return false;">Terms</a> and <a href="#" onclick="alert(\'SmartMess Privacy Policy: Your meal and hostel details are stored securely.\'); return false;">Privacy Policy</a>.';
             } else {
-                // Switch hero image to Login mockup
                 heroImage.style.opacity = '0.4';
                 setTimeout(() => {
                     heroImage.src = LOGIN_IMG;
@@ -625,7 +876,6 @@
                     heroImage.style.opacity = '1';
                 }, 120);
 
-                // Login Headers & Texts matching Login mockup
                 authTitle.innerText = "Welcome back";
                 authSubtitle.innerText = "Log in to your SmartMess account";
 
@@ -649,7 +899,7 @@
             }
         }
 
-        // Auto-switch to signup if URL specifies it (e.g., login.html?mode=signup or #signup)
+        // Auto-switch to signup if URL specifies it
         const urlParams = new URLSearchParams(window.location.search);
         if (urlParams.get('mode') === 'signup' || window.location.hash === '#signup') {
             toggleMode();
@@ -681,7 +931,7 @@
 
             const identifierVal = document.getElementById('identifier').value.trim();
 
-            // Strict validation when creating an account: emails MUST end with .iitr.ac.in
+            // Email validation for signup
             if (isSignUpMode && identifierVal.includes("@")) {
                 const parts = identifierVal.toLowerCase().split("@");
                 const domain = parts.length === 2 ? parts[1] : "";
@@ -694,10 +944,46 @@
 
             const btn = document.getElementById('submitBtn');
             const originalBtnText = btn.innerText;
+            const fullNameVal = document.getElementById('fullName') ? document.getElementById('fullName').value.trim() : "";
+
+            // ── SIGNUP WITH EMAIL: Send OTP first ────────────────────
+            if (isSignUpMode && identifierVal.includes("@")) {
+                btn.innerText = "Sending verification code...";
+                btn.disabled = true;
+                try {
+                    const res = await fetch(`${API_BASE_URL}/api/otp/send-otp`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: identifierVal })
+                    });
+                    const data = await res.json();
+                    if (res.ok) {
+                        // Store registration data for after OTP verification
+                        pendingRegistration = {
+                            email: identifierVal.trim().toLowerCase(),
+                            identifier: identifierVal,
+                            name: fullNameVal,
+                            password: password,
+                            bhawanName: selectedBhawan,
+                        };
+                        showOtpPanel(pendingRegistration.email);
+                    } else {
+                        errorText.innerText = data.error || "Failed to send verification email. Please try again.";
+                        errorText.style.display = 'block';
+                    }
+                } catch {
+                    errorText.innerText = "Network error connecting to backend.";
+                    errorText.style.display = 'block';
+                } finally {
+                    btn.innerText = originalBtnText;
+                    btn.disabled = false;
+                }
+                return; // Do NOT proceed to regular login/signup below
+            }
+
+            // ── LOGIN or SIGNUP WITH STUDENT ID (no email, no OTP) ──
             btn.innerText = isSignUpMode ? "Creating account..." : "Logging in...";
             btn.disabled = true;
-
-            const fullNameVal = document.getElementById('fullName') ? document.getElementById('fullName').value.trim() : "";
 
             const payload = {
                 name: fullNameVal,
@@ -706,7 +992,6 @@
                 bhawanName: selectedBhawan,
                 isSignUp: isSignUpMode
             };
-            const API_BASE_URL = "https://smartmess-0hqf.onrender.com";
             try {
                 const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
                     method: 'POST',
