@@ -118,18 +118,6 @@ model Alert {
   isResolved  Boolean  @default(false) 
   createdAt   DateTime @default(now())
 }
-// OTP verification for new student email registration
-model OtpVerification {
-  id        String   @id @default(uuid())
-  email     String
-  otp       String
-  expiresAt DateTime
-  verified  Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  @@index([email])
-}
-
 model MealSelection {
   id        String   @id @default(uuid())
   studentId String
