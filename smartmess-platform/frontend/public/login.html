@@ -285,6 +285,41 @@
             margin-left: 14px;
         }
 
+        /* Omniport OAuth Button */
+        .btn-omniport {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            width: 100%;
+            padding: 13px 20px;
+            background: #2E7D32;
+            color: #FFFFFF;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+            text-decoration: none;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 3px 8px rgba(46, 125, 50, 0.25);
+            box-sizing: border-box;
+            text-align: center;
+        }
+
+        .btn-omniport:hover {
+            background-color: #256628;
+            color: #FFFFFF;
+            transform: translateY(-1px);
+            box-shadow: 0 5px 12px rgba(46, 125, 50, 0.35);
+        }
+
+        .btn-omniport:active {
+            background-color: #1B4D1E;
+            transform: translateY(0);
+        }
+
         /* Continue with Google button */
         .btn-google {
             width: 100%;
@@ -494,6 +529,15 @@
                     <!-- Submit Button -->
                     <button type="submit" id="submitBtn" class="btn-login">Log in</button>
 
+                    <!-- Divider -->
+                    <p class="divider" style="text-align:center; margin: 18px 0;">— OR —</p>
+
+                    <!-- Omniport Login Button Link -->
+                    <a href="https://smartmess-0hqf.onrender.com/api/auth/omniport" id="omniportBtn" class="btn-omniport" style="display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:13px 20px; background:#2e7d32; color:white; border-radius:12px; text-decoration:none; font-weight:bold; font-family:'DM Sans', sans-serif; box-sizing:border-box;">
+                        <i class="ri-shield-keyhole-line" style="font-size: 1.15rem;"></i>
+                        <span>Log in with Omniport</span>
+                    </a>
+
                     <!-- Switcher: Create an account / Log in -->
                     <div class="account-switch-wrapper">
                         <span id="toggleTextPrompt">New to SmartMess?</span>
@@ -564,6 +608,11 @@
                 if (enteredName) userData.name = enteredName;
             }
             localStorage.setItem('smartmess_user', JSON.stringify(userData));
+            if (userData.token) {
+                localStorage.setItem('authToken', userData.token);
+            } else if (!localStorage.getItem('authToken') && userData.id) {
+                localStorage.setItem('authToken', userData.id);
+            }
             window.location.replace('/');
         }
 
@@ -612,6 +661,7 @@
                 bhawanSelect.required = true;
 
                 submitBtn.innerText = "Create account";
+                const omniBtn = document.getElementById('omniportBtn'); if (omniBtn) { const span = omniBtn.querySelector('span'); if (span) span.innerText = 'Sign up with Omniport'; }
                 toggleTextPrompt.innerText = "Already have an account?";
                 toggleLink.innerText = "Log in";
 
@@ -642,6 +692,7 @@
                 bhawanSelect.selectedIndex = 0;
 
                 submitBtn.innerText = "Log in";
+                const omniBtn = document.getElementById('omniportBtn'); if (omniBtn) { const span = omniBtn.querySelector('span'); if (span) span.innerText = 'Log in with Omniport'; }
                 toggleTextPrompt.innerText = "New to SmartMess?";
                 toggleLink.innerText = "Create an account";
 

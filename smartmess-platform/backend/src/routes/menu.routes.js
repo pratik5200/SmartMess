@@ -348,7 +348,7 @@ router.post("/rate/:menuId", ratingUpload, async (req, res) => {
         const { menuId } = req.params;
         const rating = parseInt(req.body.rating, 10);
         const comment = req.body.comment || null;
-        const studentId = req.body.studentId || null; 
+        const studentId = req.body.studentId || (req.user && req.user.id) || null; 
 
         const menu = await prisma.menu.findUnique({ where: { id: menuId } });
         if (!menu) return res.status(404).json({ error: "Menu not found" });
@@ -608,7 +608,8 @@ router.delete("/latest-week/:bhawanId", async (req, res) => {
 // ---------------------------------------------------------
 router.post("/selection", async (req, res) => {
     try {
-        const { studentId, menuId } = req.body;
+        const studentId = req.body.studentId || (req.user && req.user.id);
+        const { menuId } = req.body;
         // Veg coupons cannot be issued - only NON-VEG coupons exist
         const choice = 'NON-VEG';
         

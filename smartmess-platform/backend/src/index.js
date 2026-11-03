@@ -42,8 +42,10 @@ const contactRoutes = require("./routes/contact.routes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/bhawans", bhawanRoutes);
-app.use("/api/menus", menuRoutes);
-app.use("/api/feedback", feedbackRoutes);
+const { verifyToken } = require("./middleware/auth");
+
+app.use("/api/menus", verifyToken, menuRoutes);
+app.use("/api/feedback", verifyToken, feedbackRoutes);
 app.use("/api/contact", contactRoutes);
 
 app.get("/", (req, res) => {

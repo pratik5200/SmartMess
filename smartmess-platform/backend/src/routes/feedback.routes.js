@@ -39,7 +39,8 @@ function getISTMinutes() {
 // Submit granular daily item rating
 router.post("/daily", async (req, res) => {
   try {
-    const { studentId, menuId, item_name, rating, comment } = req.body;
+    const studentId = req.body.studentId || (req.user && req.user.id);
+    const { menuId, item_name, rating, comment } = req.body;
 
     const menu = await prisma.menu.findUnique({
       where: { id: menuId },
@@ -120,7 +121,8 @@ router.get("/daily/:studentId/:menuId", async (req, res) => {
 // Submit Sunday weekly summary rating
 router.post("/weekly", async (req, res) => {
   try {
-    const { studentId, bhawanId, week_start, overall, suggestions } = req.body;
+    const studentId = req.body.studentId || (req.user && req.user.id);
+    const { bhawanId, week_start, overall, suggestions } = req.body;
 
     const weekly = await prisma.weeklySummary.create({
       data: {
