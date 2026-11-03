@@ -1314,22 +1314,25 @@
 
     <script>
 
-        const urlParams = new URLSearchParams(window.location.search);
-        const omniUserBase64 = urlParams.get('omni_user');
+        // --- OMNIPORT AUTH CAPTURE ---
+        (function() {
+            const omniParams = new URLSearchParams(window.location.search);
+            const omniUserBase64 = omniParams.get('omni_user');
 
-        if (omniUserBase64) {
-            try {
-                const userData = JSON.parse(atob(omniUserBase64));
-                localStorage.setItem('smartmess_user', JSON.stringify(userData));
-                
-                // Clean the URL so the token doesn't stay visible in the address bar
-                const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
-                window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
-            } catch (e) {
-                console.error("Failed to parse Omniport token.");
-                window.location.href = 'login.html';
+            if (omniUserBase64) {
+                try {
+                    const userData = JSON.parse(atob(omniUserBase64));
+                    localStorage.setItem('smartmess_user', JSON.stringify(userData));
+                    
+                    // Clean the URL so the token doesn't stay visible in the address bar
+                    const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+                    window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+                } catch (e) {
+                    console.error("Failed to parse Omniport token.");
+                    window.location.href = 'login.html';
+                }
             }
-        }
+        })();
 
         // --- SIDEBAR TOGGLE LOGIC ---
         function toggleSidebar() {
