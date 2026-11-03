@@ -27,20 +27,24 @@ model Bhawan {
 }
 
 model User {
-  id            String          @id @default(uuid())
-  email         String          @unique
-  roll_no       String?         @unique 
-  password      String?         // NEW: Password field
-  role          Role            @default(STUDENT)
-  bhawanId      String
-  bhawan        Bhawan          @relation(fields: [bhawanId], references: [id])
+  id              String          @id @default(uuid())
+  email           String          @unique
+  roll_no         String?         @unique 
+  password        String?         // NEW: Password field
+  role            Role            @default(STUDENT)
+  bhawanId        String
+  bhawan          Bhawan          @relation(fields: [bhawanId], references: [id])
+  
+  // NEW: Tracks if login is 'local' (password) or 'omniport' (SSO)
+  auth_provider   String          @default("local") 
+  
   // NEW FIELDS
-  name        String?
-  profilePic  String?  @db.Text // @db.Text allows storing large Base64 image strings
-  dailyRatings  DailyFeedback[]
-  weeklyRatings WeeklySummary[]
-  feedbacks     Feedback[] 
-  mealSelections MealSelection[]     // Links User to the new photo feedback
+  name            String?
+  profilePic      String?         @db.Text // @db.Text allows storing large Base64 image strings
+  dailyRatings    DailyFeedback[]
+  weeklyRatings   WeeklySummary[]
+  feedbacks       Feedback[] 
+  mealSelections  MealSelection[] // Links User to the new photo feedback
 }
 
 enum Role {

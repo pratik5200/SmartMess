@@ -25,6 +25,8 @@
             --primary-green-hover: #4E6342;
             --primary-green-active: #405236;
             --text-dark: #231F1D;
+            --text-espresso: #231F1D;
+            --border-light: #E5E7EB;
             --text-muted: #6B7280;
             --border-color: #E5E7EB;
             --bg-hero: #FEFCF6;
@@ -494,6 +496,14 @@
                     <!-- Submit Button -->
                     <button type="submit" id="submitBtn" class="btn-login">Log in</button>
 
+                    <div style="display: flex; justify-content: center; margin-top: 15px; margin-bottom: 15px;">
+                        <button type="button" onclick="window.location.href='https://smartmess-0hqf.onrender.com/api/auth/omniport'" style="width: 100%; padding: 14px; background: #FFFFFF; color: var(--text-espresso); border: 1px solid var(--border-light); border-radius: 9999px; font-weight: 600; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: background-color 0.2s;">
+                            Log in with Omniport
+                        </button>
+                    </div>
+
+                    <div class="divider">OR</div>
+
                     <!-- Switcher: Create an account / Log in -->
                     <div class="account-switch-wrapper">
                         <span id="toggleTextPrompt">New to SmartMess?</span>
@@ -528,6 +538,20 @@
         }
 
         const errorText = document.getElementById('errorText');
+        // Handle Omniport Error Query Params
+        const loginUrlParams = new URLSearchParams(window.location.search);
+        const loginError = loginUrlParams.get('error');
+        if (loginError) {
+            const errorMsgMap = {
+                'omniport_missing_code': 'Omniport authorization code was missing.',
+                'omniport_token_failed': 'Failed to exchange authorization code with Omniport.',
+                'omniport_no_token': 'No access token received from Omniport.',
+                'omniport_profile_failed': 'Failed to retrieve profile from Omniport.',
+                'omniport_server_error': 'Server error during Omniport authentication.'
+            };
+            errorText.innerText = errorMsgMap[loginError] || ('Omniport Error: ' + loginError);
+            errorText.style.display = 'block';
+        }
         let isSignUpMode = false; // Tracks if the user is registering
 
         // Password Visibility Toggles

@@ -48,6 +48,13 @@ router.post('/login', async (req, res) => {
         }
         // EXISTING USER: Handle Login
         if (user && !isSignUp) {
+            // Security check: Omniport accounts without a password cannot log in via password form
+            if (user.auth_provider === "omniport" && !user.password) {
+                return res.status(400).json({
+                    error: "This account was created via Omniport. Please use 'Log in with Omniport'."
+                });
+            }
+
             // Block any student account previously registered with a non-IITR email
             if (user.role === "STUDENT" && user.email && !isValidIITREmail(user.email)) {
                 return res.status(403).json({
@@ -92,7 +99,8 @@ router.post('/login', async (req, res) => {
                     roll_no: isEmail ? null : identifier,
                     password: hashedPassword,
                     bhawanId: userBhawan.id,
-                    role: "STUDENT"
+                    role: "STUDENT",
+                    auth_provider: "local"
                 },
                 include: { bhawan: true }
             });
@@ -128,7 +136,7 @@ router.post("/google", async (req, res) => {
       if (!userBhawan) userBhawan = await prisma.bhawan.create({ data: { name: bhawanName } });
 
       user = await prisma.user.create({
-        data: { email: email, name: name || null, role: "STUDENT", bhawanId: userBhawan.id }, 
+        data: { email: email, name: name || null, role: "STUDENT", bhawanId: userBhawan.id, auth_provider: "google" }, 
         include: { bhawan: true }
       });
     } else if (name && !user.name) {
@@ -202,7 +210,8 @@ router.get("/user-info", async (req, res) => {
             roll_no: user.roll_no,
             role: user.role,
             bhawanId: user.bhawanId,
-            bhawanName: user.bhawan ? user.bhawan.name : "Vivekanand Bhawan"
+            bhawanName: user.bhawan ? user.bhawan.name : "Vivekanand Bhawan",
+            auth_provider: user.auth_provider || "local"
         };
 
         res.json(result);
@@ -285,7 +294,7 @@ router.put("/profile/:id", async (req, res) => {
         const updatedUser = await prisma.user.update({
             where: { id: req.params.id },
             data: updateData,
-            include: { bhawan: true } // Include bhawan relation to send the new name back
+            include: { bhawan: true }
         });
 
         const userWithBhawan = {
@@ -300,6 +309,152 @@ router.put("/profile/:id", async (req, res) => {
     }
 });
 
+// =============================================
+// OMNIPORT OAUTH2 LOGIN FLOW
+// =============================================
+
+// Route 1: Redirect user to Omniport OAuth login portal
+router.get("/omniport", (req, res) => {
+    const clientId = process.env.OMNIPORT_CLIENT_ID || "";
+    const redirectUri = process.env.OMNIPORT_REDIRECT_URI || "";
+    return res.redirect(`https://omniport.iitr.ac.in/oauth/?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`);
+});
+
+// Route 2: Handle Omniport OAuth callback
+router.get("/omniport/callback", async (req, res) => {
+    const frontendUrl = (process.env.FRONTEND_URL || "https://smart-mess-theta.vercel.app").replace(/\/$/, "");
+    const { code } = req.query;
+
+    if (!code) {
+        return res.redirect(`${frontendUrl}/login.html?error=omniport_missing_code`);
+    }
+
+    try {
+        // Exchange authorization code for access token
+        const tokenParams = new URLSearchParams({
+            client_id: process.env.OMNIPORT_CLIENT_ID || "",
+            grant_type: "authorization_code",
+            code: String(code),
+            redirect_uri: process.env.OMNIPORT_REDIRECT_URI || "",
+        });
+
+        // Crucially, only append client_secret if it is provided
+        if (process.env.OMNIPORT_CLIENT_SECRET && process.env.OMNIPORT_CLIENT_SECRET.trim()) {
+            tokenParams.append("client_secret", process.env.OMNIPORT_CLIENT_SECRET.trim());
+        }
+
+        const tokenResponse = await fetch("https://omniport.iitr.ac.in/open_auth/token/", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: tokenParams.toString(),
+        });
+
+        if (!tokenResponse.ok) {
+            const errText = await tokenResponse.text();
+            console.error("Omniport Token Exchange Failed:", tokenResponse.status, errText);
+            return res.redirect(`${frontendUrl}/login.html?error=omniport_token_failed`);
+        }
+
+        const tokenData = await tokenResponse.json();
+        const accessToken = tokenData.access_token;
+
+        if (!accessToken) {
+            console.error("Omniport OAuth Error: No access_token in response", tokenData);
+            return res.redirect(`${frontendUrl}/login.html?error=omniport_no_token`);
+        }
+
+        // Fetch user profile from Omniport
+        const profileResponse = await fetch("https://omniport.iitr.ac.in/resources/profile/", {
+            method: "GET",
+            headers: {
+                Authorization: `Bearer ${accessToken}`,
+            },
+        });
+
+        if (!profileResponse.ok) {
+            const profileErr = await profileResponse.text();
+            console.error("Omniport Profile Fetch Failed:", profileResponse.status, profileErr);
+            return res.redirect(`${frontendUrl}/login.html?error=omniport_profile_failed`);
+        }
+
+        const profile = await profileResponse.json();
+
+        // Extract student details
+        const email = profile.institute_webmail_address || profile.email;
+        const rollNo = profile.enrollment_number ? String(profile.enrollment_number) : (profile.roll_no ? String(profile.roll_no) : null);
+        const name = profile.name || (profile.first_name ? `${profile.first_name} ${profile.last_name || ""}`.trim() : null);
+        const bhawanName = profile.hostel || profile.bhawan || "Govind Bhawan";
+
+        let user = null;
+        const lookupConditions = [];
+        if (email) lookupConditions.push({ email });
+        if (rollNo) lookupConditions.push({ roll_no: rollNo });
+
+        if (lookupConditions.length > 0) {
+            user = await prisma.user.findFirst({
+                where: { OR: lookupConditions },
+                include: { bhawan: true }
+            });
+        }
+
+        if (user) {
+            // Update auth_provider to omniport if it isn't already
+            const updateData = {};
+            if (user.auth_provider !== "omniport") {
+                updateData.auth_provider = "omniport";
+            }
+            if (name && !user.name) {
+                updateData.name = name;
+            }
+            if (rollNo && !user.roll_no) {
+                updateData.roll_no = rollNo;
+            }
+
+            if (Object.keys(updateData).length > 0) {
+                user = await prisma.user.update({
+                    where: { id: user.id },
+                    data: updateData,
+                    include: { bhawan: true }
+                });
+            }
+        } else {
+            // Find or create Bhawan, then create new User
+            let userBhawan = await prisma.bhawan.findFirst({ where: { name: bhawanName } });
+            if (!userBhawan) {
+                userBhawan = await prisma.bhawan.create({ data: { name: bhawanName } });
+            }
+
+            user = await prisma.user.create({
+                data: {
+                    email: email || `${rollNo || Date.now()}@iitr.ac.in`,
+                    roll_no: rollNo,
+                    name: name || null,
+                    role: "STUDENT",
+                    bhawanId: userBhawan.id,
+                    auth_provider: "omniport"
+                },
+                include: { bhawan: true }
+            });
+        }
+
+        // Prepare serialized user object
+        const userPayload = {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            roll_no: user.roll_no,
+            role: user.role,
+            bhawanId: user.bhawanId,
+            bhawanName: user.bhawan ? user.bhawan.name : bhawanName,
+            auth_provider: user.auth_provider || "omniport"
+        };
+
+        const encodedUser = Buffer.from(JSON.stringify(userPayload)).toString("base64");
+        return res.redirect(`${frontendUrl}/student-dashboard.html?omni_user=${encodedUser}`);
+    } catch (error) {
+        console.error("Omniport OAuth Callback Error:", error);
+        return res.redirect(`${frontendUrl}/login.html?error=omniport_server_error`);
+    }
+});
+
 module.exports = router;
-// Prisma Studio is running at: http://localhost:51212
-// SmartMess backend running on http://localhost:5000
