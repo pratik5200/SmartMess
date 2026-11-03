@@ -382,22 +382,45 @@ router.get("/omniport/callback", async (req, res) => {
 
         const profile = await profileResponse.json();
 
-        // Extract student details (supporting both Channel i get_user_data and flat formats)
-        const email = profile.contactInformation?.instituteWebmailAddress 
-            || profile.institute_webmail_address 
-            || profile.email;
+        // Safely extract student details
         const rawRollNo = profile.student?.enrolmentNumber 
+            || profile.student?.enrolment_number 
+            || profile.student?.roll_no 
             || profile.enrollment_number 
+            || profile.enrolmentNumber 
             || profile.student_id 
-            || profile.roll_no;
-        const rollNo = rawRollNo ? String(rawRollNo) : null;
-        const name = profile.person?.fullName 
-            || profile.name 
-            || (profile.first_name ? `${profile.first_name} ${profile.last_name || ""}`.trim() : null);
-        const bhawanName = profile.student?.currentAddress 
-            || profile.hostel 
-            || profile.bhawan 
-            || "Govind Bhawan";
+            || profile.roll_no 
+            || profile.userId 
+            || null;
+        const rollNo = rawRollNo ? String(rawRollNo).trim() : null;
+
+        const email = (typeof profile.contactInformation?.instituteWebmailAddress === "string" && profile.contactInformation.instituteWebmailAddress.trim())
+            || (typeof profile.institute_webmail_address === "string" && profile.institute_webmail_address.trim())
+            || (typeof profile.email === "string" && profile.email.trim())
+            || (typeof profile.username === "string" && profile.username.includes("@") && profile.username.trim())
+            || (rollNo ? `${rollNo}@iitr.ac.in` : null);
+
+        const name = (typeof profile.person?.fullName === "string" && profile.person.fullName.trim()) 
+            || (typeof profile.name === "string" && profile.name.trim()) 
+            || (profile.first_name ? `${profile.first_name} ${profile.last_name || ""}`.trim() : null)
+            || "Student";
+
+        // CRITICAL: Ensure bhawanName is ALWAYS a string, never an Object (currentAddress is an object in Channel i)
+        let bhawanName = "Rajiv Bhawan";
+        if (typeof profile.hostel === "string" && profile.hostel.trim()) {
+            bhawanName = profile.hostel.trim();
+        } else if (typeof profile.bhawan === "string" && profile.bhawan.trim()) {
+            bhawanName = profile.bhawan.trim();
+        } else if (typeof profile.student?.hostel === "string" && profile.student.hostel.trim()) {
+            bhawanName = profile.student.hostel.trim();
+        } else if (typeof profile.student?.currentAddress === "string" && profile.student.currentAddress.trim()) {
+            bhawanName = profile.student.currentAddress.trim();
+        } else if (profile.student?.currentAddress && typeof profile.student.currentAddress === "object") {
+            const addr = profile.student.currentAddress.address || "";
+            const knownBhawans = ["Azad", "Cautley", "Ganga", "Govind", "Himalaya", "Jawahar", "Kasturba", "Malviya", "Radhakrishnan", "Rajendra", "Rajiv", "Ravindra", "Sarojini", "Vigyan Kunj", "Vivekanand"];
+            const found = knownBhawans.find(b => addr.toLowerCase().includes(b.toLowerCase()));
+            if (found) bhawanName = `${found} Bhawan`;
+        }
 
         let user = null;
         const lookupConditions = [];
@@ -407,6 +430,14 @@ router.get("/omniport/callback", async (req, res) => {
         if (lookupConditions.length > 0) {
             user = await prisma.user.findFirst({
                 where: { OR: lookupConditions },
+                include: { bhawan: true }
+            });
+        }
+
+        // If still not found by email or roll_no, try matching by full name
+        if (!user && name && name !== "Student") {
+            user = await prisma.user.findFirst({
+                where: { name: { equals: name.trim(), mode: 'insensitive' } },
                 include: { bhawan: true }
             });
         }
@@ -421,7 +452,11 @@ router.get("/omniport/callback", async (req, res) => {
                 updateData.name = name;
             }
             if (rollNo && !user.roll_no) {
-                updateData.roll_no = rollNo;
+                // Check if rollNo is already taken by another account before updating
+                const existingWithRoll = await prisma.user.findFirst({ where: { roll_no: rollNo } });
+                if (!existingWithRoll) {
+                    updateData.roll_no = rollNo;
+                }
             }
 
             if (Object.keys(updateData).length > 0) {
@@ -438,9 +473,10 @@ router.get("/omniport/callback", async (req, res) => {
                 userBhawan = await prisma.bhawan.create({ data: { name: bhawanName } });
             }
 
+            const userEmail = email || `${rollNo || Date.now()}@iitr.ac.in`;
             user = await prisma.user.create({
                 data: {
-                    email: email || `${rollNo || Date.now()}@iitr.ac.in`,
+                    email: userEmail,
                     roll_no: rollNo,
                     name: name || null,
                     role: "STUDENT",
@@ -467,7 +503,8 @@ router.get("/omniport/callback", async (req, res) => {
         return res.redirect(`${frontendUrl}/student-dashboard.html?omni_user=${encodedUser}`);
     } catch (error) {
         console.error("Omniport OAuth Callback Error:", error);
-        return res.redirect(`${frontendUrl}/login.html?error=omniport_server_error`);
+        const errDetail = encodeURIComponent(error.message || String(error));
+        return res.redirect(`${frontendUrl}/login.html?error=omniport_server_error&details=${errDetail}`);
     }
 });
 

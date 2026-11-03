@@ -542,12 +542,13 @@
         const loginUrlParams = new URLSearchParams(window.location.search);
         const loginError = loginUrlParams.get('error');
         if (loginError) {
+            const errorDetails = loginUrlParams.get('details');
             const errorMsgMap = {
                 'omniport_missing_code': 'Omniport authorization code was missing.',
                 'omniport_token_failed': 'Failed to exchange authorization code with Omniport.',
                 'omniport_no_token': 'No access token received from Omniport.',
                 'omniport_profile_failed': 'Failed to retrieve profile from Omniport.',
-                'omniport_server_error': 'Server error during Omniport authentication.'
+                'omniport_server_error': errorDetails ? ('Server error: ' + decodeURIComponent(errorDetails)) : 'Server error during Omniport authentication.'
             };
             errorText.innerText = errorMsgMap[loginError] || ('Omniport Error: ' + loginError);
             errorText.style.display = 'block';
