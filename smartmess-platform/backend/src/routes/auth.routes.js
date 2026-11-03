@@ -62,6 +62,9 @@ router.post('/login', async (req, res) => {
                 });
             }
 
+            if (!user.password) {
+                return res.status(400).json({ error: "This account uses SSO. Please log in using Google or Omniport." });
+            }
             const isPasswordValid = await bcrypt.compare(password, user.password);
             if (!isPasswordValid) return res.status(401).json({ error: "Incorrect password." });
             
