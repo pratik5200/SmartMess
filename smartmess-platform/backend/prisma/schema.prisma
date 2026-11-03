@@ -31,7 +31,6 @@ model User {
   email         String          @unique
   roll_no       String?         @unique 
   password      String?         // NEW: Password field
-  auth_provider String?         @default("local")
   role          Role            @default(STUDENT)
   bhawanId      String
   bhawan        Bhawan          @relation(fields: [bhawanId], references: [id])
