@@ -317,7 +317,7 @@ router.put("/profile/:id", async (req, res) => {
 router.get("/omniport", (req, res) => {
     const clientId = process.env.OMNIPORT_CLIENT_ID || "";
     const redirectUri = process.env.OMNIPORT_REDIRECT_URI || "";
-    return res.redirect(`https://omniport.iitr.ac.in/oauth/?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`);
+    return res.redirect(`https://channeli.in/oauth/authorise/?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code`);
 });
 
 // Route 2: Handle Omniport OAuth callback
@@ -343,7 +343,7 @@ router.get("/omniport/callback", async (req, res) => {
             tokenParams.append("client_secret", process.env.OMNIPORT_CLIENT_SECRET.trim());
         }
 
-        const tokenResponse = await fetch("https://omniport.iitr.ac.in/open_auth/token/", {
+        const tokenResponse = await fetch("https://channeli.in/open_auth/token/", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
             body: tokenParams.toString(),
@@ -364,7 +364,7 @@ router.get("/omniport/callback", async (req, res) => {
         }
 
         // Fetch user profile from Omniport
-        const profileResponse = await fetch("https://omniport.iitr.ac.in/resources/profile/", {
+        const profileResponse = await fetch("https://channeli.in/open_auth/get_user_data/", {
             method: "GET",
             headers: {
                 Authorization: `Bearer ${accessToken}`,
@@ -379,11 +379,22 @@ router.get("/omniport/callback", async (req, res) => {
 
         const profile = await profileResponse.json();
 
-        // Extract student details
-        const email = profile.institute_webmail_address || profile.email;
-        const rollNo = profile.enrollment_number ? String(profile.enrollment_number) : (profile.roll_no ? String(profile.roll_no) : null);
-        const name = profile.name || (profile.first_name ? `${profile.first_name} ${profile.last_name || ""}`.trim() : null);
-        const bhawanName = profile.hostel || profile.bhawan || "Govind Bhawan";
+        // Extract student details (supporting both Channel i get_user_data and flat formats)
+        const email = profile.contactInformation?.instituteWebmailAddress 
+            || profile.institute_webmail_address 
+            || profile.email;
+        const rawRollNo = profile.student?.enrolmentNumber 
+            || profile.enrollment_number 
+            || profile.student_id 
+            || profile.roll_no;
+        const rollNo = rawRollNo ? String(rawRollNo) : null;
+        const name = profile.person?.fullName 
+            || profile.name 
+            || (profile.first_name ? `${profile.first_name} ${profile.last_name || ""}`.trim() : null);
+        const bhawanName = profile.student?.currentAddress 
+            || profile.hostel 
+            || profile.bhawan 
+            || "Govind Bhawan";
 
         let user = null;
         const lookupConditions = [];
