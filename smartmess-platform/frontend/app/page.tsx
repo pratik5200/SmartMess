@@ -729,7 +729,6 @@ export default function SmartMessHome() {
                     <span>support@smartmess.com</span>
                   </button>
                 </li>
-                <li>+91 00000 00000</li>
                 <li>IIT Roorkee, Uttarakhand</li>
               </ul>
             </div>
